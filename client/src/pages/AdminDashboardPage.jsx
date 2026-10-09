@@ -197,66 +197,197 @@ export const AdminDashboardPage = () => {
           </div>
         )}
 
-        {/* Analytics Charts */}
+        {/* Analytics Charts & Campus Intelligence */}
         {stats && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Event Category Breakdown */}
-            <div className="cyber-glass p-6 rounded-3xl border border-white/10 space-y-4">
-              <h3 className="font-extrabold text-sm text-white font-cyber flex items-center gap-2">
-                <BarChart2 className="w-4 h-4 text-cyan-400" />
-                EVENT DISTRIBUTION BY CATEGORY
-              </h3>
-              <div className="h-60 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.categoryStats} margin={{ top: 10, right: 10, left: -20, bottom: 10 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                    <XAxis dataKey="name" stroke="#64748b" tick={{ fontSize: 10, fill: '#94a3b8' }} />
-                    <YAxis stroke="#64748b" tick={{ fontSize: 10, fill: '#94a3b8' }} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#090e1f',
-                        borderColor: 'rgba(0,240,255,0.3)',
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                      }}
-                    />
-                    <Bar dataKey="count" name="Events Count" radius={[6, 6, 0, 0]}>
-                      {stats.categoryStats.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Event Category Breakdown */}
+              <div className="cyber-glass p-6 rounded-3xl border border-cyan-500/20 space-y-5 flex flex-col justify-between">
+                <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                  <h3 className="font-extrabold text-sm text-white font-cyber flex items-center gap-2">
+                    <BarChart2 className="w-4 h-4 text-cyan-400" />
+                    EVENT DISTRIBUTION BY CATEGORY
+                  </h3>
+                  <span className="text-[11px] font-mono text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/30">
+                    {stats.totalEvents} Active Events
+                  </span>
+                </div>
+
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={stats.categoryStats} margin={{ top: 20, right: 10, left: -20, bottom: 20 }}>
+                      <defs>
+                        <linearGradient id="barGradient0" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#00f0ff" stopOpacity={0.95} />
+                          <stop offset="100%" stopColor="#0077b6" stopOpacity={0.3} />
+                        </linearGradient>
+                        <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#a855f7" stopOpacity={0.95} />
+                          <stop offset="100%" stopColor="#6366f1" stopOpacity={0.3} />
+                        </linearGradient>
+                        <linearGradient id="barGradient2" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#00ff9d" stopOpacity={0.95} />
+                          <stop offset="100%" stopColor="#059669" stopOpacity={0.3} />
+                        </linearGradient>
+                        <linearGradient id="barGradient3" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#ffb703" stopOpacity={0.95} />
+                          <stop offset="100%" stopColor="#d97706" stopOpacity={0.3} />
+                        </linearGradient>
+                        <linearGradient id="barGradient4" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.95} />
+                          <stop offset="100%" stopColor="#be123c" stopOpacity={0.3} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.6} />
+                      <XAxis
+                        dataKey="name"
+                        stroke="#64748b"
+                        tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }}
+                        axisLine={{ stroke: '#334155' }}
+                      />
+                      <YAxis
+                        allowDecimals={false}
+                        stroke="#64748b"
+                        tick={{ fontSize: 11, fill: '#94a3b8' }}
+                        axisLine={{ stroke: '#334155' }}
+                      />
+                      <Tooltip
+                        cursor={{ fill: 'rgba(255, 255, 255, 0.04)' }}
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="bg-[#090e1f]/95 backdrop-blur-xl border border-cyan-500/40 rounded-xl p-3 shadow-[0_0_25px_rgba(0,240,255,0.25)] font-mono text-xs space-y-1">
+                                <p className="font-bold text-white flex items-center gap-1.5 font-cyber">
+                                  <span
+                                    className="w-2.5 h-2.5 rounded-full"
+                                    style={{ backgroundColor: COLORS[payload[0].payload?.__index % COLORS.length] || '#00f0ff' }}
+                                  />
+                                  <span>{label}</span>
+                                </p>
+                                <p className="text-slate-300">
+                                  Campus Events: <strong className="text-cyan-300 font-cyber text-sm">{payload[0].value}</strong>
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Bar dataKey="count" name="Events Count" radius={[8, 8, 2, 2]}>
+                        {stats.categoryStats.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={`url(#barGradient${index % 5})`}
+                            stroke={COLORS[index % COLORS.length]}
+                            strokeWidth={1.5}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Category Legend Badges */}
+                <div className="flex flex-wrap gap-2 pt-3 border-t border-white/5">
+                  {stats.categoryStats.map((entry, idx) => (
+                    <div
+                      key={entry.name}
+                      className="px-2.5 py-1 rounded-xl bg-slate-900/80 border border-white/10 flex items-center gap-2 text-xs"
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: COLORS[idx % COLORS.length] }}
+                      />
+                      <span className="text-slate-300 font-medium">{entry.name}</span>
+                      <span className="font-mono font-bold text-white bg-white/10 px-1.5 py-0.5 rounded text-[10px]">
+                        {entry.count}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Department Engagement Leaderboard */}
+              <div className="cyber-glass p-6 rounded-3xl border border-emerald-500/20 space-y-5 flex flex-col justify-between">
+                <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                  <h3 className="font-extrabold text-sm text-white font-cyber flex items-center gap-2">
+                    <Award className="w-4 h-4 text-emerald-400" />
+                    DEPARTMENT ENGAGEMENT LEADERBOARD
+                  </h3>
+                  <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                    {stats.totalRegistrations} Registrations
+                  </span>
+                </div>
+
+                {/* Department Ranked Cards */}
+                <div className="space-y-3">
+                  {stats.deptStats.map((dept, idx) => {
+                    const percentage = stats.totalRegistrations > 0
+                      ? Math.round((dept.count / stats.totalRegistrations) * 100)
+                      : 0;
+                    return (
+                      <div
+                        key={dept.name}
+                        className="p-3 rounded-2xl bg-slate-900/70 border border-white/5 space-y-2 hover:border-emerald-500/30 transition-all"
+                      >
+                        <div className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs font-bold text-emerald-400">
+                              #{idx + 1}
+                            </span>
+                            <span className="font-semibold text-white">{dept.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2 font-mono">
+                            <span className="text-emerald-300 font-bold">{dept.count} seats</span>
+                            <span className="text-slate-400 text-[10px]">({percentage}%)</span>
+                          </div>
+                        </div>
+
+                        {/* Visual Progress Bar */}
+                        <div className="w-full h-2 rounded-full bg-slate-950 overflow-hidden border border-white/5">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-400 shadow-[0_0_10px_rgba(16,185,129,0.4)] transition-all duration-700"
+                            style={{ width: `${Math.max(5, percentage)}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Attendance Metric Footnote */}
+                <div className="p-3 rounded-xl bg-slate-950/60 border border-emerald-500/20 flex items-center justify-between text-xs font-mono">
+                  <span className="text-slate-400">Total Verified Students:</span>
+                  <span className="font-bold text-emerald-400">{stats.studentsCount} Students</span>
+                </div>
               </div>
             </div>
 
-            {/* Department Participation Breakdown */}
-            <div className="cyber-glass p-6 rounded-3xl border border-white/10 space-y-4">
-              <h3 className="font-extrabold text-sm text-white font-cyber flex items-center gap-2">
-                <Award className="w-4 h-4 text-emerald-400" />
-                DEPARTMENT ENGAGEMENT LEADERBOARD
-              </h3>
-              <div className="h-60 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={stats.deptStats}
-                    layout="vertical"
-                    margin={{ top: 10, right: 20, left: 40, bottom: 10 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                    <XAxis type="number" stroke="#64748b" tick={{ fontSize: 10, fill: '#94a3b8' }} />
-                    <YAxis dataKey="name" type="category" stroke="#64748b" tick={{ fontSize: 9, fill: '#94a3b8' }} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#090e1f',
-                        borderColor: 'rgba(16,185,129,0.3)',
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                      }}
-                    />
-                    <Bar dataKey="count" name="Student Registrations" fill="#00ff9d" radius={[0, 6, 6, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+            {/* Turnout & Verification Funnel Banner */}
+            <div className="cyber-glass p-5 rounded-2xl border border-amber-500/20 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold font-cyber text-white">COLLEGE-WIDE ATTENDANCE FUNNEL</h4>
+                  <p className="text-[11px] text-slate-400">
+                    Real-time ratio of distributed QR passes versus physical gate laser scan check-ins
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-6 w-full md:w-auto justify-end">
+                <div className="text-right">
+                  <span className="text-[10px] font-mono text-slate-400 uppercase block">Scanned / Issued</span>
+                  <span className="text-base font-bold font-mono text-white">
+                    {stats.totalCheckedIn} <span className="text-slate-500 font-normal">/</span> {stats.totalRegistrations}
+                  </span>
+                </div>
+
+                <div className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono font-bold text-sm shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                  {stats.overallTurnout}% Turnout
+                </div>
               </div>
             </div>
           </div>

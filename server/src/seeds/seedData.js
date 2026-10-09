@@ -16,38 +16,16 @@ export const seedDatabase = async () => {
 
     const passwordHash = await bcrypt.hash('password123', 10);
 
-    // 1. Create Core Platform Accounts
+    // 1. Create Core Platform Admin Account if empty
     await User.create({
       name: 'Dr. Aris Thorne',
-      email: 'admin@campus.edu',
+      email: 'admin@marwadiuniversity.ac.in',
       password: passwordHash,
       role: 'admin',
       department: 'Dean of Student Affairs',
-      organization: 'College Academic & Event Council',
-      phone: '+1 (555) 019-2831',
+      organization: 'Marwadi University Event & Academic Council',
+      phone: '+91 98765 43210',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
-    });
-
-    await User.create({
-      name: 'Sarah Chen',
-      email: 'sarah.organizer@campus.edu',
-      password: passwordHash,
-      role: 'organizer',
-      department: 'Computer Science & AI',
-      organization: 'ACM & IEEE Student Chapter',
-      phone: '+1 (555) 302-8819',
-      avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80',
-    });
-
-    await User.create({
-      name: 'Alex Rivera',
-      email: 'alex.student@campus.edu',
-      password: passwordHash,
-      role: 'student',
-      rollNumber: 'CS2026-089',
-      department: 'Computer Science',
-      phone: '+1 (555) 782-9901',
-      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80',
     });
 
     console.log('[Seed] Database successfully initialized with demo user accounts. Only real user-created events will be displayed.');

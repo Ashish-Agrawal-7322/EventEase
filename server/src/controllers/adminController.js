@@ -4,9 +4,10 @@ import { Registration } from '../models/Registration.js';
 
 export const getAdminStats = async (req, res) => {
   try {
-    const totalUsers = await User.countDocuments();
-    const studentsCount = await User.countDocuments({ role: 'student' });
-    const organizersCount = await User.countDocuments({ role: 'organizer' });
+    const realUserFilter = { email: { $not: /@campus\.edu$/i } };
+    const totalUsers = await User.countDocuments(realUserFilter);
+    const studentsCount = await User.countDocuments({ ...realUserFilter, role: 'student' });
+    const organizersCount = await User.countDocuments({ ...realUserFilter, role: 'organizer' });
     const totalEvents = await Event.countDocuments();
     const totalRegistrations = await Registration.countDocuments();
     const totalCheckedIn = await Registration.countDocuments({ status: 'checked_in' });
@@ -52,7 +53,8 @@ export const getAdminStats = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({}).sort({ createdAt: -1 });
+    const realUserFilter = { email: { $not: /@campus\.edu$/i } };
+    const users = await User.find(realUserFilter).sort({ createdAt: -1 });
     const sanitized = users.map(u => ({
       id: u._id,
       name: u.name,
