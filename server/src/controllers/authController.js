@@ -44,17 +44,6 @@ export const sendRegistrationOtp = async (req, res) => {
       });
     }
 
-    // 1.5 Anti-impersonation: block student enrollment emails from registering as Faculty
-    if (role === 'faculty') {
-      const username = cleanEmail.split('@')[0];
-      if (/\d{4,}/.test(username)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Student email format detected (enrollment digits in email). Student accounts cannot register for Faculty/Staff privileges. Please select Student role.',
-        });
-      }
-    }
-
     // 2. Check if user already exists
     const userExists = await User.findOne({ email: cleanEmail });
     if (userExists) {
@@ -174,16 +163,7 @@ export const register = async (req, res) => {
     let isFacultyUser = role === 'faculty';
 
     if (role === 'faculty') {
-      // 1. Anti-impersonation: student email (containing enrollment numbers) cannot register as faculty
-      const localPart = cleanEmail.split('@')[0];
-      if (/\d{4,}/.test(localPart)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Student email format detected (enrollment digits in email). Student accounts cannot register for Faculty/Staff privileges. Please select Student role.',
-        });
-      }
-
-      // 2. Validate Employee ID
+      // 1. Validate Employee ID
       if (!employeeId || employeeId.trim().length < 3) {
         return res.status(400).json({
           success: false,

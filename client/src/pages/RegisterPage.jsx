@@ -49,13 +49,6 @@ export const RegisterPage = () => {
   const [error, setError] = useState('');
   const [successNotice, setSuccessNotice] = useState('');
 
-  // Detect student emails containing enrollment numbers (e.g. 128212 in amankumar.tiwari128212@...)
-  const isStudentEmailFormat = (email) => {
-    if (!email) return false;
-    const local = email.split('@')[0] || '';
-    return /\d{4,}/.test(local);
-  };
-
   // Countdown timer for OTP resend
   useEffect(() => {
     let interval = null;
@@ -103,10 +96,6 @@ export const RegisterPage = () => {
     }
 
     if (formData.role === 'faculty') {
-      if (isStudentEmailFormat(formData.email)) {
-        setError('⚠️ Student enrollment number detected in email! Student accounts cannot register for Faculty/Staff privileges. Please select Student role.');
-        return;
-      }
       if (!formData.employeeId.trim()) {
         setError('Please enter your Faculty / Employee ID (e.g. MU-FAC-1049)');
         return;
@@ -443,8 +432,6 @@ export const RegisterPage = () => {
                       className={`w-full bg-slate-900 border rounded-xl pl-10 pr-3 py-2.5 text-white placeholder-slate-500 focus:outline-none font-mono transition-all ${
                         !formData.email
                           ? 'border-white/10 focus:border-cyan-400'
-                          : formData.role === 'faculty' && isStudentEmailFormat(formData.email)
-                          ? 'border-amber-500/80 focus:border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)]'
                           : isMarwadiEmail(formData.email)
                           ? 'border-emerald-500/60 focus:border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
                           : 'border-red-500/80 focus:border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.25)]'
@@ -461,17 +448,6 @@ export const RegisterPage = () => {
                       <span>
                         Please enter your official Marwadi University email (must end with{' '}
                         <strong className="font-mono text-red-200">@marwadiuniversity.ac.in</strong>). Personal emails like Gmail or Yahoo are not allowed.
-                      </span>
-                    </motion.div>
-                  ) : formData.role === 'faculty' && formData.email && isStudentEmailFormat(formData.email) ? (
-                    <motion.div
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-[11px] text-amber-300 mt-2 flex items-start gap-1.5 font-medium bg-amber-950/70 p-2.5 rounded-xl border border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.2)]"
-                    >
-                      <AlertCircle className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
-                      <span>
-                        <strong>Student Enrollment ID Detected:</strong> This email contains student roll numbers. Student emails cannot register for Faculty/Staff privileges. Please select <strong>Student</strong> or enter your official staff email.
                       </span>
                     </motion.div>
                   ) : formData.email && isMarwadiEmail(formData.email) ? (
