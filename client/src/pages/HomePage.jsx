@@ -82,13 +82,14 @@ export const HomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [activeTicketModal, setActiveTicketModal] = useState(null);
   const [registeringId, setRegisteringId] = useState(null);
+  const [myRegistrations, setMyRegistrations] = useState({});
   const [personaTab, setPersonaTab] = useState('student'); // 'student' or 'organizer'
   const [openFaq, setOpenFaq] = useState(0);
   const [showEventModal, setShowEventModal] = useState(false);
 
   useEffect(() => {
     loadEvents();
-  }, [selectedCategory]);
+  }, [selectedCategory, user]);
 
   const loadEvents = async () => {
     setLoading(true);
@@ -98,6 +99,26 @@ export const HomePage = () => {
       const res = await api.events.getAll(params);
       if (res.success) {
         setEvents(res.events);
+      }
+
+      if (user) {
+        try {
+          const ticketsRes = await api.registrations.getMyTickets();
+          if (ticketsRes.success && Array.isArray(ticketsRes.registrations)) {
+            const regMap = {};
+            ticketsRes.registrations.forEach((r) => {
+              const eid = typeof r.event === 'object' && r.event ? (r.event._id || r.event.id) : r.event;
+              if (eid) {
+                regMap[eid.toString()] = r;
+              }
+            });
+            setMyRegistrations(regMap);
+          }
+        } catch {
+          // Gracefully fallback
+        }
+      } else {
+        setMyRegistrations({});
       }
     } catch (err) {
       console.error('Failed to load events:', err);
@@ -118,6 +139,10 @@ export const HomePage = () => {
       const res = await api.registrations.register(eventId);
       if (res.success) {
         setActiveTicketModal(res.registration);
+        setMyRegistrations((prev) => ({
+          ...prev,
+          [eventId.toString()]: res.registration,
+        }));
         loadEvents();
       }
     } catch (err) {
@@ -708,6 +733,9 @@ export const HomePage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEvents.map((event) => {
+              const eventId = (event._id || event.id || '').toString();
+              const userReg = myRegistrations[eventId] || event.userRegistration;
+              const isRegistered = Boolean(userReg || event.isRegistered);
               const isFull = event.isFull;
               const fillRate = event.fillRate || 0;
               const spotsLeft = event.spotsLeft !== undefined ? event.spotsLeft : Math.max(0, event.capacity - event.registeredCount);
@@ -741,7 +769,12 @@ export const HomePage = () => {
                     </div>
 
                     <div className="absolute top-3 right-3">
-                      {event.isExpired ? (
+                      {isRegistered ? (
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 flex items-center gap-1 backdrop-blur-md shadow-[0_0_12px_rgba(16,185,129,0.3)]">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                          <span>Registered</span>
+                        </span>
+                      ) : event.isExpired ? (
                         <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-slate-900/90 text-slate-400 border border-slate-700/60 backdrop-blur-md">
                           Expired
                         </span>
@@ -822,28 +855,46 @@ export const HomePage = () => {
                         <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
 
-                      <button
-                        onClick={(e) => handleRegister(event._id || event.id, e)}
-                        disabled={event.isExpired || isFull || registeringId === (event._id || event.id)}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                          event.isExpired
-                            ? 'bg-slate-900 text-slate-500 cursor-not-allowed border border-white/5 font-mono'
-                            : isFull
-                            ? 'bg-slate-800/60 text-slate-500 cursor-not-allowed border border-white/5'
-                            : 'bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:brightness-110 active:scale-95'
-                        }`}
-                      >
-                        {event.isExpired ? (
-                          <span>Expired</span>
-                        ) : (
-                          <>
-                            <Ticket className="w-3.5 h-3.5" />
-                            <span>
-                              {registeringId === (event._id || event.id) ? 'Generating Pass...' : isFull ? 'Event Full' : 'Register & Get QR'}
-                            </span>
-                          </>
-                        )}
-                      </button>
+                      {isRegistered ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (userReg) {
+                              setActiveTicketModal(userReg);
+                            } else {
+                              navigate(`/events/${event._id || event.id}`);
+                            }
+                          }}
+                          className="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.25)] hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] active:scale-95 font-cyber"
+                          title="You are registered! Click to view your pass"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>Registered</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) => handleRegister(event._id || event.id, e)}
+                          disabled={event.isExpired || isFull || registeringId === (event._id || event.id)}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                            event.isExpired
+                              ? 'bg-slate-900 text-slate-500 cursor-not-allowed border border-white/5 font-mono'
+                              : isFull
+                              ? 'bg-slate-800/60 text-slate-500 cursor-not-allowed border border-white/5'
+                              : 'bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:brightness-110 active:scale-95'
+                          }`}
+                        >
+                          {event.isExpired ? (
+                            <span>Expired</span>
+                          ) : (
+                            <>
+                              <Ticket className="w-3.5 h-3.5" />
+                              <span>
+                                {registeringId === (event._id || event.id) ? 'Generating Pass...' : isFull ? 'Event Full' : 'Register & Get QR'}
+                              </span>
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </motion.div>

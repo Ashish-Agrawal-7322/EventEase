@@ -39,9 +39,23 @@ export const getEvents = async (req, res) => {
       );
     }
 
-    // Enhance events with dynamic stats and expiration status
+    // If user is authenticated, query their registrations to identify which events they have joined
+    let userRegistrationsMap = {};
+    if (req.user) {
+      const userRegs = await Registration.find({ user: req.user._id });
+      userRegs.forEach(r => {
+        const evId = r.event ? r.event.toString() : '';
+        if (evId) {
+          userRegistrationsMap[evId] = r;
+        }
+      });
+    }
+
+    // Enhance events with dynamic stats, expiration status, and user registration state
     const enrichedEvents = events.map(e => {
       const ev = e.toObject ? e.toObject() : { ...e };
+      const eventIdStr = (ev._id || ev.id || '').toString();
+      const userRegistration = userRegistrationsMap[eventIdStr] || null;
       const capacity = Number(ev.capacity) || 100;
       const registered = Number(ev.registeredCount) || 0;
       const checkedIn = Number(ev.checkedInCount) || 0;
@@ -49,6 +63,8 @@ export const getEvents = async (req, res) => {
       return {
         ...ev,
         isExpired,
+        isRegistered: !!userRegistration,
+        userRegistration,
         spotsLeft: Math.max(0, capacity - registered),
         isFull: registered >= capacity,
         fillRate: Math.min(100, Math.round((registered / capacity) * 100)),
@@ -97,6 +113,7 @@ export const getEventById = async (req, res) => {
       event: {
         ...ev,
         isExpired,
+        isRegistered: !!userRegistration,
         spotsLeft: Math.max(0, capacity - registered),
         isFull: registered >= capacity,
         fillRate: Math.min(100, Math.round((registered / capacity) * 100)),

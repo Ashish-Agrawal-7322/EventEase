@@ -36,45 +36,46 @@ export const HologramPassModal = ({ ticket, isOpen, onClose, onSimulateScan }) =
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl">
+      <div className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-4 bg-black/85 backdrop-blur-xl flex justify-center items-center">
         <motion.div
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-md bg-[#0a1024] rounded-3xl overflow-hidden border border-cyan-500/40 shadow-[0_0_80px_rgba(0,240,255,0.25)]"
+          className="relative w-full max-w-md bg-[#0a1024] rounded-3xl border border-cyan-500/40 shadow-[0_0_80px_rgba(0,240,255,0.25)] my-auto max-h-[92vh] flex flex-col overflow-hidden"
         >
-          {/* Hologram Gradient Header */}
-          <div className="relative p-6 pb-4 bg-gradient-to-br from-cyan-950/80 via-[#0d1633] to-purple-950/80 border-b border-white/10">
+          {/* Hologram Gradient Header - Pinned at top (shrink-0) */}
+          <div className="relative p-5 pb-4 bg-gradient-to-br from-cyan-950/90 via-[#0d1633] to-purple-950/90 border-b border-white/10 shrink-0">
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 rounded-full bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 transition-all border border-white/10"
+              className="absolute top-4 right-4 p-2 rounded-full bg-slate-800/90 text-slate-300 hover:text-white hover:bg-slate-700 transition-all border border-white/10 shadow-lg"
+              title="Close Pass"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">
                 {event.category || 'EVENT'}
               </span>
-              <span className="text-xs text-slate-400 font-mono tracking-widest uppercase">
+              <span className="text-[11px] text-slate-400 font-mono tracking-widest uppercase">
                 DIGITAL PASS
               </span>
             </div>
 
-            <h2 className="text-xl font-extrabold text-white leading-tight font-cyber">
+            <h2 className="text-lg sm:text-xl font-extrabold text-white leading-tight font-cyber pr-8">
               {event.title || 'College Event Pass'}
             </h2>
             <p className="text-xs text-slate-300 mt-1">{event.tagline || 'Official Campus Entry Credential'}</p>
           </div>
 
-          {/* Central Holographic QR Viewport */}
-          <div className="p-6 text-center space-y-5">
+          {/* Central Holographic QR & Details - Scrollable Body */}
+          <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-4 text-center scrollbar-thin">
             <div className="relative inline-block mx-auto">
-              <div className="p-4 rounded-2xl bg-white border-4 border-cyan-400 shadow-[0_0_35px_rgba(0,240,255,0.4)]">
+              <div className="p-3.5 rounded-2xl bg-white border-4 border-cyan-400 shadow-[0_0_35px_rgba(0,240,255,0.4)]">
                 <QRCodeSVG
                   value={ticket.qrPayload || ticket.ticketCode}
-                  size={200}
+                  size={175}
                   level="H"
                   bgColor="#ffffff"
                   fgColor="#000000"
@@ -84,8 +85,8 @@ export const HologramPassModal = ({ ticket, isOpen, onClose, onSimulateScan }) =
 
               {isCheckedIn && (
                 <div className="absolute inset-0 bg-emerald-950/85 backdrop-blur-[2px] rounded-2xl flex flex-col items-center justify-center p-4 border-2 border-emerald-400">
-                  <CheckCircle2 className="w-16 h-16 text-emerald-400 animate-bounce" />
-                  <span className="text-base font-extrabold text-emerald-300 uppercase tracking-widest mt-2 font-cyber">
+                  <CheckCircle2 className="w-14 h-14 text-emerald-400 animate-bounce" />
+                  <span className="text-sm font-extrabold text-emerald-300 uppercase tracking-widest mt-2 font-cyber">
                     Admitted
                   </span>
                   <span className="text-xs text-emerald-200 mt-1 font-mono">
@@ -96,9 +97,9 @@ export const HologramPassModal = ({ ticket, isOpen, onClose, onSimulateScan }) =
             </div>
 
             {/* Ticket Code Bar */}
-            <div className="flex items-center justify-center gap-2 bg-slate-900/90 py-2 px-4 rounded-xl border border-white/10 w-fit mx-auto">
-              <span className="text-xs uppercase font-mono text-slate-400">TICKET:</span>
-              <span className="font-mono font-bold text-cyan-300 text-sm tracking-wider">
+            <div className="flex items-center justify-center gap-2 bg-slate-900/90 py-1.5 px-3.5 rounded-xl border border-white/10 w-fit mx-auto">
+              <span className="text-[11px] uppercase font-mono text-slate-400">TICKET:</span>
+              <span className="font-mono font-bold text-cyan-300 text-xs sm:text-sm tracking-wider">
                 {ticket.ticketCode}
               </span>
               <button
@@ -111,7 +112,7 @@ export const HologramPassModal = ({ ticket, isOpen, onClose, onSimulateScan }) =
             </div>
 
             {/* Attendee Details Grid */}
-            <div className="grid grid-cols-2 gap-3 text-left p-3.5 rounded-xl bg-slate-900/60 border border-white/5 text-xs">
+            <div className="grid grid-cols-2 gap-2.5 text-left p-3 rounded-xl bg-slate-900/60 border border-white/5 text-xs">
               <div>
                 <span className="text-[10px] uppercase font-mono text-slate-500 block">Student</span>
                 <span className="font-semibold text-white truncate block">{ticket.studentName}</span>
@@ -164,7 +165,7 @@ export const HologramPassModal = ({ ticket, isOpen, onClose, onSimulateScan }) =
             )}
 
             {/* Actions */}
-            <div className="flex items-center gap-2 pt-1">
+            <div className="flex items-center gap-2 pt-1 pb-1">
               <button
                 onClick={handlePrint}
                 className="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-white/10 flex items-center justify-center gap-1.5 transition-all"
