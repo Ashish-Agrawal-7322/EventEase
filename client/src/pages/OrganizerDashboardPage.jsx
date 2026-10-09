@@ -34,7 +34,8 @@ import {
   Music,
   Gamepad2,
   Award,
-  FileText
+  FileText,
+  Briefcase
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -336,15 +337,23 @@ export const OrganizerDashboardPage = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="p-2 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                <Sparkles className="w-5 h-5" />
+              <span
+                className={`p-2 rounded-xl ${
+                  user?.isFaculty
+                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                    : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                }`}
+              >
+                {user?.isFaculty ? <Briefcase className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
               </span>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-cyber">
-                ORGANIZER OPERATIONS COMMAND
+                {user?.isFaculty ? 'FACULTY ACADEMIC & EVENT COMMAND' : 'ORGANIZER OPERATIONS COMMAND'}
               </h1>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Real-time attendance gate management, QR laser scanning, capacity oversight, and export.
+              {user?.isFaculty
+                ? `Departmental event coordination (${user.department || 'Academic'}), live student gate check-in, and official attendance audit rosters.`
+                : 'Real-time attendance gate management, QR laser scanning, capacity oversight, and export.'}
             </p>
           </div>
 

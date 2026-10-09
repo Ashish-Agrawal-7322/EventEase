@@ -20,7 +20,9 @@ import {
   ScanLine,
   UserPlus,
   Trash2,
-  Plus
+  Plus,
+  Briefcase,
+  LayoutDashboard
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -286,8 +288,33 @@ export const EventDetailPage = () => {
                   </span>
                 </div>
 
-                {/* State: Registered */}
-                {isRegistered ? (
+                {/* State: Faculty Academic Oversight */}
+                {user?.isFaculty ? (
+                  <div className="space-y-3 pt-2">
+                    <div className="p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-center space-y-2 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
+                        <Briefcase className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-white block font-cyber">FACULTY ACADEMIC OVERSIGHT</span>
+                        <span className="text-[10px] text-emerald-400 font-mono">
+                          {user.designation ? `${user.designation} • ${user.department || 'Academic'}` : 'Official Academic Staff'}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-300 leading-relaxed">
+                        Faculty members oversee student attendance, manage gate laser check-ins, and issue certificates. Student passes are not required for faculty.
+                      </p>
+                    </div>
+
+                    <Link
+                      to="/organizer"
+                      className="w-full py-3 rounded-xl font-bold text-xs bg-gradient-to-r from-emerald-500 to-cyan-500 hover:brightness-110 text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 font-cyber tracking-wider"
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      <span>Open Faculty Operations Hub</span>
+                    </Link>
+                  </div>
+                ) : isRegistered ? (
                   <div className="space-y-3 pt-2">
                     <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-center">
                       <CheckCircle2 className="w-6 h-6 text-emerald-400 mx-auto mb-1" />

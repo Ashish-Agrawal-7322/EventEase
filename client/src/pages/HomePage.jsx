@@ -33,7 +33,8 @@ import {
   Compass,
   Cpu,
   Radio,
-  Sliders
+  Sliders,
+  Briefcase
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -769,7 +770,12 @@ export const HomePage = () => {
                     </div>
 
                     <div className="absolute top-3 right-3">
-                      {isRegistered ? (
+                      {user?.isFaculty ? (
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 flex items-center gap-1 backdrop-blur-md shadow-[0_0_12px_rgba(16,185,129,0.3)]">
+                          <Briefcase className="w-3 h-3 text-emerald-400" />
+                          <span>Academic Faculty</span>
+                        </span>
+                      ) : isRegistered ? (
                         <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 flex items-center gap-1 backdrop-blur-md shadow-[0_0_12px_rgba(16,185,129,0.3)]">
                           <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                           <span>Registered</span>
@@ -855,7 +861,19 @@ export const HomePage = () => {
                         <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
 
-                      {isRegistered ? (
+                      {user?.isFaculty ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate('/organizer');
+                          }}
+                          className="px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.25)] hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] active:scale-95 font-mono"
+                          title="Open Faculty Academic Command & Event Supervision"
+                        >
+                          <Briefcase className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>Faculty Hub</span>
+                        </button>
+                      ) : isRegistered ? (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();

@@ -158,11 +158,8 @@ export const RegisterPage = () => {
     setLoading(false);
 
     if (res.success) {
-      if (res.user.role === 'organizer') {
+      if (res.user.role === 'organizer' || res.user.isFaculty) {
         navigate('/organizer');
-      } else if (res.user.organizerStatus === 'pending') {
-        alert('🎉 Account created! Your Club Lead verification is pending Admin review. In the meantime, you can explore events and purchase tickets as a student.');
-        navigate('/');
       } else {
         navigate('/');
       }

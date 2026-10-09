@@ -13,7 +13,9 @@ import {
   Sparkles,
   ChevronDown,
   Building,
-  Clock
+  Clock,
+  Briefcase,
+  CalendarPlus
 } from 'lucide-react';
 import { ClubApplicationModal } from './ClubApplicationModal';
 
@@ -70,7 +72,8 @@ export const Navbar = () => {
               <span>Explore Events</span>
             </Link>
 
-            {user && (
+            {/* Student Tickets Link (Only for students) */}
+            {user && !user.isFaculty && user.role === 'student' && (
               <Link
                 to="/my-tickets"
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all ${
@@ -84,7 +87,21 @@ export const Navbar = () => {
               </Link>
             )}
 
-            {isOrganizer && (
+            {/* Faculty Dedicated Academic Hub Link */}
+            {user?.isFaculty ? (
+              <Link
+                to="/organizer"
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all ${
+                  isActive('/organizer')
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.2)]'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                }`}
+              >
+                <Briefcase className="w-4 h-4 text-emerald-400" />
+                <span>Faculty Hub</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              </Link>
+            ) : isOrganizer ? (
               <Link
                 to="/organizer"
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all ${
@@ -97,7 +114,7 @@ export const Navbar = () => {
                 <span>Organizer Hub</span>
                 <span className="w-2 h-2 rounded-full bg-purple-400 animate-ping" />
               </Link>
-            )}
+            ) : null}
 
             {isAdmin && (
               <Link
@@ -118,15 +135,26 @@ export const Navbar = () => {
           <div className="flex items-center gap-3">
             {user ? (
               <div className="flex items-center gap-3">
-                {/* Register Event / Club Button */}
-                <button
-                  onClick={() => setShowClubModal(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-500/40 text-xs font-semibold transition-all shadow-[0_0_15px_rgba(168,85,247,0.2)] group"
-                  title="Register and host a campus event"
-                >
-                  <Building className="w-3.5 h-3.5 text-purple-400 group-hover:scale-110 transition-transform" />
-                  <span>Register Event / Club</span>
-                </button>
+                {/* Faculty Host Event vs Club Application Button */}
+                {user.isFaculty ? (
+                  <Link
+                    to="/organizer"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-500/40 text-xs font-semibold transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] group"
+                    title="Open Faculty Academic Command & Host Event"
+                  >
+                    <CalendarPlus className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                    <span>Host Department Event</span>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => setShowClubModal(true)}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-500/40 text-xs font-semibold transition-all shadow-[0_0_15px_rgba(168,85,247,0.2)] group"
+                    title="Register and host a campus event"
+                  >
+                    <Building className="w-3.5 h-3.5 text-purple-400 group-hover:scale-110 transition-transform" />
+                    <span>Register Event / Club</span>
+                  </button>
+                )}
 
                 <div className="hidden sm:flex flex-col text-right">
                   <div className="flex items-center gap-1.5 justify-end">
@@ -136,7 +164,7 @@ export const Navbar = () => {
                         user.role === 'admin'
                           ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                           : user.isFaculty
-                          ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
+                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                           : user.role === 'organizer'
                           ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
                           : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
@@ -145,12 +173,14 @@ export const Navbar = () => {
                       {user.role === 'admin'
                         ? 'ADMIN'
                         : user.isFaculty
-                        ? `FACULTY`
+                        ? 'FACULTY'
                         : user.role}
                     </span>
                   </div>
                   <span className="text-[10px] text-slate-400 font-mono">
-                    {user.rollNumber || user.department || user.email}
+                    {user.isFaculty && user.designation
+                      ? `${user.designation} • ${user.department || 'Academic'}`
+                      : user.rollNumber || user.department || user.email}
                   </span>
                 </div>
 

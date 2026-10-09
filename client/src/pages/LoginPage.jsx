@@ -28,7 +28,7 @@ export const LoginPage = () => {
     setLoading(false);
 
     if (res.success) {
-      if (res.user.role === 'organizer') navigate('/organizer');
+      if (res.user.role === 'organizer' || res.user.isFaculty) navigate('/organizer');
       else if (res.user.role === 'admin') navigate('/admin');
       else navigate('/my-tickets');
     } else {
@@ -41,7 +41,7 @@ export const LoginPage = () => {
     const res = await quickSwitchUser(role);
     setLoading(false);
     if (res.success) {
-      if (res.user.role === 'organizer') navigate('/organizer');
+      if (res.user.role === 'organizer' || res.user.isFaculty) navigate('/organizer');
       else if (res.user.role === 'admin') navigate('/admin');
       else navigate('/my-tickets');
     }
