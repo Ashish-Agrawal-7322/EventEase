@@ -86,6 +86,20 @@ export const EventAnalyticsPage = () => {
     }
   };
 
+  const [exportingCsv, setExportingCsv] = useState(false);
+  const handleExportCSV = async () => {
+    if (!event) return;
+    try {
+      setExportingCsv(true);
+      await api.registrations.exportCSV(event._id, event.title);
+    } catch (err) {
+      console.error('Failed to export CSV:', err);
+      alert(err.message || 'Failed to export CSV attendance');
+    } finally {
+      setExportingCsv(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -150,14 +164,15 @@ export const EventAnalyticsPage = () => {
               <RefreshCw className="w-4 h-4" />
             </button>
 
-            <a
-              href={api.registrations.getExportUrl(event._id)}
-              download
-              className="px-4 py-2.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-2 transition-all font-mono"
+            <button
+              onClick={handleExportCSV}
+              disabled={exportingCsv}
+              className="px-4 py-2.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-2 transition-all font-mono disabled:opacity-50"
+              title="Download CSV attendance roster"
             >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-              <span>Export CSV Attendance</span>
-            </a>
+              <FileSpreadsheet className={`w-4 h-4 text-emerald-400 ${exportingCsv ? 'animate-spin' : ''}`} />
+              <span>{exportingCsv ? 'Exporting...' : 'Export CSV Attendance'}</span>
+            </button>
           </div>
         </div>
 

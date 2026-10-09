@@ -264,10 +264,10 @@ const generateDynamicHumanReply = ({ message, conversationHistory = [], liveEven
   }
 
   // C4: Certificates & Accreditation Credits
-  if (q.includes('cert') || q.includes('certificate') || q.includes('credit') || q.includes('naac') || q.includes('attendance') || q.includes('proof')) {
+  if (q.includes('cert') || q.includes('certificate') || q.includes('credit') || q.includes('attendance') || q.includes('proof')) {
     return {
       success: true,
-      reply: `🎓 **Verifiable Digital Certificates of Participation:**\n\n• **Requirement:** Certificates are issued exclusively to attendees who complete **physical gate check-in** at the event venue (anti-fraud protection).\n• **Access:** Once issued by the organizer, you can view and print your certificate in your **Digital Vault** on the **My Tickets** page.\n• **Authenticity:** Each certificate includes a unique registry token and QR code verified under **NAAC Criterion 5.3**!`,
+      reply: `🎓 **Verifiable Digital Certificates of Participation:**\n\n• **Requirement:** Certificates are issued exclusively to attendees who complete **physical gate check-in** at the event venue (anti-fraud protection).\n• **Access:** Once issued by the organizer, you can view and print your certificate in your **Digital Vault** on the **My Tickets** page.\n• **Authenticity:** Each certificate includes a unique registry token and QR code verified under **Official Collegiate Standards**!`,
     };
   }
 

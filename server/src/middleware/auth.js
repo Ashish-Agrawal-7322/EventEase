@@ -8,8 +8,13 @@ export const protect = async (req, res, next) => {
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.query && req.query.token) {
+    token = req.query.token;
+  }
+
+  if (token) {
     try {
-      token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'eventease_secret_key_hackathon_2026');
 
       req.user = await User.findById(decoded.id);
@@ -18,16 +23,14 @@ export const protect = async (req, res, next) => {
         return res.status(401).json({ success: false, message: 'User belonging to this token no longer exists' });
       }
 
-      next();
+      return next();
     } catch (error) {
       console.error('Auth verification error:', error.message);
       return res.status(401).json({ success: false, message: 'Not authorized, token invalid or expired' });
     }
   }
 
-  if (!token) {
-    return res.status(401).json({ success: false, message: 'Not authorized, no token provided' });
-  }
+  return res.status(401).json({ success: false, message: 'Not authorized, no token provided' });
 };
 
 export const authorize = (...roles) => {

@@ -119,7 +119,29 @@ export const api = {
     },
     getAnalytics: (eventId) =>
       apiFetch(`/registrations/event/${eventId}/analytics`),
-    getExportUrl: (eventId) => `${API_BASE}/registrations/event/${eventId}/export-csv`,
+    getExportUrl: (eventId) => {
+      const token = getToken();
+      return `${API_BASE}/registrations/event/${eventId}/export-csv${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+    },
+    exportCSV: async (eventId, eventTitle = 'attendance') => {
+      const token = getToken();
+      const res = await fetch(`${API_BASE}/registrations/event/${eventId}/export-csv`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || 'Export failed');
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `attendance-${(eventTitle || 'event').replace(/[^a-zA-Z0-9]/g, '_')}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    },
     sendReminders: (eventId, alertTitle) =>
       apiFetch(`/registrations/event/${eventId}/send-reminders`, {
         method: 'POST',

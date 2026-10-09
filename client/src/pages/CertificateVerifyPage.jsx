@@ -110,7 +110,7 @@ export function CertificateVerifyPage() {
                   CERTIFICATE OF PARTICIPATION
                 </h1>
                 <p className="text-xs text-slate-400 mt-1">
-                  Issued under NAAC Criterion 5.3 Collegiate Co-Curricular Verification
+                  Official Collegiate Verification & Institutional Credential
                 </p>
               </div>
 

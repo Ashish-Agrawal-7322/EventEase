@@ -4,7 +4,6 @@ import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { QRScannerModal } from '../components/QRScannerModal';
 import { AICopilotModal } from '../components/AICopilotModal';
-import { AccreditationReportModal } from '../components/AccreditationReportModal';
 import {
   Plus,
   ScanLine,
@@ -61,7 +60,7 @@ export const OrganizerDashboardPage = () => {
   const [participantSearch, setParticipantSearch] = useState('');
   const [loadingParticipants, setLoadingParticipants] = useState(false);
   const [showCopilotModal, setShowCopilotModal] = useState(false);
-  const [showReportModal, setShowReportModal] = useState(false);
+  const [exportingCsv, setExportingCsv] = useState(false);
   const [issuingCertificates, setIssuingCertificates] = useState(false);
   const [certSuccessMsg, setCertSuccessMsg] = useState('');
   const [adminViewScope, setAdminViewScope] = useState('mine'); // 'mine' or 'all' (only for admin)
@@ -299,6 +298,19 @@ export const OrganizerDashboardPage = () => {
       alert(err.message || 'Error broadcasting reminders');
     } finally {
       setSendingReminder(false);
+    }
+  };
+
+  const handleExportCSV = async (event) => {
+    if (!event) return;
+    try {
+      setExportingCsv(true);
+      await api.registrations.exportCSV(event._id, event.title);
+    } catch (err) {
+      console.error('Failed to export CSV:', err);
+      alert(err.message || 'Failed to export CSV attendance');
+    } finally {
+      setExportingCsv(false);
     }
   };
 
@@ -586,15 +598,6 @@ export const OrganizerDashboardPage = () => {
                 </button>
 
                 <button
-                  onClick={() => setShowReportModal(true)}
-                  className="px-3.5 py-2 rounded-xl bg-purple-600/25 hover:bg-purple-600/40 text-purple-300 border border-purple-500/40 text-xs font-semibold flex items-center gap-2 transition-all"
-                  title="Generate NAAC Criterion 5 / NBA Co-curricular Outcome Report with Gemini AI"
-                >
-                  <FileText className="w-4 h-4 text-purple-400" />
-                  <span>NAAC Audit Report</span>
-                </button>
-
-                <button
                   onClick={handleBroadcastReminder}
                   disabled={sendingReminder || participants.length === 0}
                   className="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -604,14 +607,15 @@ export const OrganizerDashboardPage = () => {
                   <span>{sendingReminder ? 'Sending Alerts...' : 'Broadcast 2h Alert'}</span>
                 </button>
 
-                <a
-                  href={api.registrations.getExportUrl(selectedEventForParticipants._id)}
-                  download
-                  className="px-3.5 py-2 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-xs font-semibold flex items-center gap-2 transition-all"
+                <button
+                  onClick={() => handleExportCSV(selectedEventForParticipants)}
+                  disabled={exportingCsv}
+                  className="px-3.5 py-2 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-xs font-semibold flex items-center gap-2 transition-all disabled:opacity-50"
+                  title="Download CSV attendance roster"
                 >
-                  <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-                  <span>Export CSV</span>
-                </a>
+                  <FileSpreadsheet className={`w-4 h-4 text-emerald-400 ${exportingCsv ? 'animate-spin' : ''}`} />
+                  <span>{exportingCsv ? 'Exporting...' : 'Export CSV'}</span>
+                </button>
 
                 <button
                   onClick={() => setActiveScannerEvent(selectedEventForParticipants)}
@@ -995,13 +999,6 @@ export const OrganizerDashboardPage = () => {
           isOpen={showCopilotModal}
           onClose={() => setShowCopilotModal(false)}
           onApplyGeneratedData={handleApplyCopilotData}
-        />
-
-        {/* NAAC Criterion 5 Accreditation Report Modal */}
-        <AccreditationReportModal
-          isOpen={showReportModal}
-          onClose={() => setShowReportModal(false)}
-          event={selectedEventForParticipants}
         />
       </div>
     </div>
