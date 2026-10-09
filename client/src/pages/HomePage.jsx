@@ -34,7 +34,8 @@ import {
   Cpu,
   Radio,
   Sliders,
-  Briefcase
+  Briefcase,
+  LayoutDashboard
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -862,17 +863,31 @@ export const HomePage = () => {
                       </Link>
 
                       {user?.isFaculty ? (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate('/organizer');
-                          }}
-                          className="px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.25)] hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] active:scale-95 font-mono"
-                          title="Open Faculty Academic Command & Event Supervision"
-                        >
-                          <Briefcase className="w-3.5 h-3.5 text-emerald-400" />
-                          <span>Faculty Hub</span>
-                        </button>
+                        (event.organizer?._id === user._id || event.organizer === user._id) ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate('/organizer');
+                            }}
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.25)] hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] active:scale-95 font-mono"
+                            title="Manage your event, view attendees, and open gate scanner"
+                          >
+                            <LayoutDashboard className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>Manage Event</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/events/${event._id || event.id}`);
+                            }}
+                            className="px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-white/10 active:scale-95 font-mono"
+                            title="View event details as faculty observer"
+                          >
+                            <Briefcase className="w-3.5 h-3.5 text-slate-400" />
+                            <span>Faculty Observer</span>
+                          </button>
+                        )
                       ) : isRegistered ? (
                         <button
                           onClick={(e) => {
