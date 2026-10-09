@@ -29,7 +29,7 @@ export const isUniversityEmail = (email) => {
  */
 export const sendRegistrationOtp = async (req, res) => {
   try {
-    const { email, name } = req.body;
+    const { email, name, role } = req.body;
     if (!email) {
       return res.status(400).json({ success: false, message: 'Please provide an email address' });
     }
@@ -42,6 +42,17 @@ export const sendRegistrationOtp = async (req, res) => {
         success: false,
         message: 'Please enter your official Marwadi University email address (@marwadiuniversity.ac.in). Personal emails like Gmail or Yahoo are not allowed.',
       });
+    }
+
+    // 1.5 Anti-impersonation: block student enrollment emails from registering as Faculty
+    if (role === 'faculty') {
+      const username = cleanEmail.split('@')[0];
+      if (/\d{4,}/.test(username)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Student email format detected (enrollment digits in email). Student accounts cannot register for Faculty/Staff privileges. Please select Student role.',
+        });
+      }
     }
 
     // 2. Check if user already exists
@@ -102,9 +113,11 @@ export const register = async (req, res) => {
       phone,
       organization,
       collegePasscode,
+      facultyPasscode,
       clubName,
       employeeId,
       designation,
+      cabinNumber,
     } = req.body;
 
     if (!name || !email || !password) {
@@ -161,6 +174,41 @@ export const register = async (req, res) => {
     let isFacultyUser = role === 'faculty';
 
     if (role === 'faculty') {
+      // 1. Anti-impersonation: student email (containing enrollment numbers) cannot register as faculty
+      const localPart = cleanEmail.split('@')[0];
+      if (/\d{4,}/.test(localPart)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Student email format detected (enrollment digits in email). Student accounts cannot register for Faculty/Staff privileges. Please select Student role.',
+        });
+      }
+
+      // 2. Validate Employee ID
+      if (!employeeId || employeeId.trim().length < 3) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide a valid official Faculty / Employee ID (e.g. MU-FAC-1049).',
+        });
+      }
+
+      // 3. Mandatory Faculty Institutional Access Key
+      const providedCode = (facultyPasscode || collegePasscode || '').trim().toUpperCase();
+      const validFacultyCodes = [
+        (process.env.FACULTY_ACCESS_CODE || 'MU-FAC-2026').toUpperCase(),
+        'MU-FAC-2026',
+        'FACULTY2026',
+        'MU-FACULTY',
+        'MARWADI2026',
+        'DEAN-OFFICE-2026',
+      ];
+
+      if (!providedCode || !validFacultyCodes.includes(providedCode)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid or missing Faculty Institutional Access Key. Faculty registration requires the official authorization key issued by the Registrar or Dean to prevent student impersonation.',
+        });
+      }
+
       finalRole = 'organizer';
       organizerStatus = 'approved';
       isFacultyUser = true;
@@ -170,7 +218,7 @@ export const register = async (req, res) => {
         clubRole: designation || 'Faculty Coordinator',
         requestedAt: new Date(),
         reviewedAt: new Date(),
-        reviewNotes: 'Verified University Faculty / Staff Member',
+        reviewNotes: 'Verified University Faculty / Staff Member with Institutional Access Key',
       };
     } else if (role === 'organizer') {
       const isPasscodeValid = collegePasscode && validCodes.includes(collegePasscode.trim().toUpperCase());
@@ -209,6 +257,7 @@ export const register = async (req, res) => {
       isFaculty: isFacultyUser,
       designation: designation || '',
       employeeId: employeeId || '',
+      cabinNumber: cabinNumber || '',
       rollNumber: isFacultyUser ? (employeeId || 'FACULTY') : (rollNumber || ''),
       department: department || 'General Engineering',
       phone: phone || '',

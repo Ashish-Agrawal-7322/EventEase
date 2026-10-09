@@ -43,10 +43,10 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(credentials),
       }),
-    sendRegistrationOtp: (email, name) =>
+    sendRegistrationOtp: (email, name, role) =>
       apiFetch('/auth/send-registration-otp', {
         method: 'POST',
-        body: JSON.stringify({ email, name }),
+        body: JSON.stringify({ email, name, role }),
       }),
     register: (userData) =>
       apiFetch('/auth/register', {

@@ -9,6 +9,7 @@ import {
   User,
   GraduationCap,
   Zap,
+  KeyRound,
   ShieldCheck,
   Briefcase,
   CheckCircle2,
@@ -18,6 +19,7 @@ import {
   ArrowLeft,
   School,
   AlertCircle,
+  Building2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -34,6 +36,8 @@ export const RegisterPage = () => {
     department: 'Computer Science',
     employeeId: '',
     designation: 'Assistant Professor',
+    facultyPasscode: '',
+    cabinNumber: '',
   });
 
   const [otp, setOtp] = useState('');
@@ -44,6 +48,13 @@ export const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successNotice, setSuccessNotice] = useState('');
+
+  // Detect student emails containing enrollment numbers (e.g. 128212 in amankumar.tiwari128212@...)
+  const isStudentEmailFormat = (email) => {
+    if (!email) return false;
+    const local = email.split('@')[0] || '';
+    return /\d{4,}/.test(local);
+  };
 
   // Countdown timer for OTP resend
   useEffect(() => {
@@ -91,14 +102,28 @@ export const RegisterPage = () => {
       return;
     }
 
-    if (formData.role === 'faculty' && !formData.employeeId.trim()) {
-      setError('Please enter your Faculty / Employee ID');
-      return;
+    if (formData.role === 'faculty') {
+      if (isStudentEmailFormat(formData.email)) {
+        setError('⚠️ Student enrollment number detected in email! Student accounts cannot register for Faculty/Staff privileges. Please select Student role.');
+        return;
+      }
+      if (!formData.employeeId.trim()) {
+        setError('Please enter your Faculty / Employee ID (e.g. MU-FAC-1049)');
+        return;
+      }
+      if (!formData.cabinNumber.trim()) {
+        setError('Please enter your Faculty Office / Cabin Location (e.g. Room 304, Block A)');
+        return;
+      }
+      if (!formData.facultyPasscode.trim()) {
+        setError('Please enter the confidential Faculty Institutional Access Key issued by the Dean / Registrar Office.');
+        return;
+      }
     }
 
     setOtpLoading(true);
     try {
-      const res = await api.auth.sendRegistrationOtp(formData.email.trim(), formData.name.trim());
+      const res = await api.auth.sendRegistrationOtp(formData.email.trim(), formData.name.trim(), formData.role);
       if (res.success) {
         setOtpSent(true);
         setResendTimer(60);
@@ -408,12 +433,18 @@ export const RegisterPage = () => {
                     <input
                       type="email"
                       required
-                      placeholder="student123456@marwadiuniversity.ac.in"
+                      placeholder={
+                        formData.role === 'faculty'
+                          ? 'firstname.lastname@marwadiuniversity.ac.in'
+                          : 'student123456@marwadiuniversity.ac.in'
+                      }
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className={`w-full bg-slate-900 border rounded-xl pl-10 pr-3 py-2.5 text-white placeholder-slate-500 focus:outline-none font-mono transition-all ${
                         !formData.email
                           ? 'border-white/10 focus:border-cyan-400'
+                          : formData.role === 'faculty' && isStudentEmailFormat(formData.email)
+                          ? 'border-amber-500/80 focus:border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)]'
                           : isMarwadiEmail(formData.email)
                           ? 'border-emerald-500/60 focus:border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
                           : 'border-red-500/80 focus:border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.25)]'
@@ -430,6 +461,17 @@ export const RegisterPage = () => {
                       <span>
                         Please enter your official Marwadi University email (must end with{' '}
                         <strong className="font-mono text-red-200">@marwadiuniversity.ac.in</strong>). Personal emails like Gmail or Yahoo are not allowed.
+                      </span>
+                    </motion.div>
+                  ) : formData.role === 'faculty' && formData.email && isStudentEmailFormat(formData.email) ? (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-[11px] text-amber-300 mt-2 flex items-start gap-1.5 font-medium bg-amber-950/70 p-2.5 rounded-xl border border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.2)]"
+                    >
+                      <AlertCircle className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
+                      <span>
+                        <strong>Student Enrollment ID Detected:</strong> This email contains student roll numbers. Student emails cannot register for Faculty/Staff privileges. Please select <strong>Student</strong> or enter your official staff email.
                       </span>
                     </motion.div>
                   ) : formData.email && isMarwadiEmail(formData.email) ? (
@@ -505,8 +547,18 @@ export const RegisterPage = () => {
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
-                    className="space-y-3 p-3.5 rounded-2xl bg-emerald-950/20 border border-emerald-500/30"
+                    className="space-y-3.5 p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/30"
                   >
+                    <div className="flex items-center justify-between pb-1 border-b border-emerald-500/20">
+                      <span className="text-[11px] font-bold text-emerald-400 font-mono flex items-center gap-1.5 uppercase tracking-wide">
+                        <Briefcase className="w-3.5 h-3.5" />
+                        Faculty Credential Verification
+                      </span>
+                      <span className="text-[10px] text-emerald-300/80 font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+                        Staff Restricted
+                      </span>
+                    </div>
+
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-emerald-300 font-semibold mb-1">
@@ -514,7 +566,7 @@ export const RegisterPage = () => {
                         </label>
                         <input
                           type="text"
-                          required
+                          required={formData.role === 'faculty'}
                           placeholder="e.g. MU-FAC-1049"
                           value={formData.employeeId}
                           onChange={(e) => setFormData({ ...formData, employeeId: e.target.value, rollNumber: e.target.value })}
@@ -539,26 +591,65 @@ export const RegisterPage = () => {
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-emerald-300 font-semibold mb-1">Academic Department</label>
-                      <select
-                        value={formData.department}
-                        onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                        className="w-full bg-slate-900 border border-emerald-500/30 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-400 text-xs"
-                      >
-                        <option value="Computer Science">Computer Science</option>
-                        <option value="Information Technology">Information Technology</option>
-                        <option value="Electronics & Comm">Electronics & Comm</option>
-                        <option value="Data Science & AI">Data Science & AI</option>
-                        <option value="Mechanical Eng">Mechanical Eng</option>
-                        <option value="Civil Engineering">Civil Engineering</option>
-                        <option value="Management Studies">Management Studies</option>
-                      </select>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-emerald-300 font-semibold mb-1">Academic Department</label>
+                        <select
+                          value={formData.department}
+                          onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                          className="w-full bg-slate-900 border border-emerald-500/30 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-400 text-xs"
+                        >
+                          <option value="Computer Science">Computer Science</option>
+                          <option value="Information Technology">Information Technology</option>
+                          <option value="Electronics & Comm">Electronics & Comm</option>
+                          <option value="Data Science & AI">Data Science & AI</option>
+                          <option value="Mechanical Eng">Mechanical Eng</option>
+                          <option value="Civil Engineering">Civil Engineering</option>
+                          <option value="Management Studies">Management Studies</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-emerald-300 font-semibold mb-1">
+                          Faculty Cabin / Office *
+                        </label>
+                        <input
+                          type="text"
+                          required={formData.role === 'faculty'}
+                          placeholder="e.g. Room 304, Block A"
+                          value={formData.cabinNumber}
+                          onChange={(e) => setFormData({ ...formData, cabinNumber: e.target.value })}
+                          className="w-full bg-slate-900 border border-emerald-500/30 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 text-xs"
+                        />
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-[11px] text-emerald-300/90 pt-1">
-                      <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span>Instant Activation: Verified Marwadi University faculty receive automated event hosting rights.</span>
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-emerald-300 font-semibold flex items-center gap-1.5">
+                          <KeyRound className="w-3.5 h-3.5 text-emerald-400" />
+                          Faculty Institutional Access Key *
+                        </label>
+                        <span className="text-[10px] text-emerald-400 font-mono">Dean Office Key</span>
+                      </div>
+                      <input
+                        type="text"
+                        required={formData.role === 'faculty'}
+                        placeholder="e.g. MU-FAC-2026"
+                        value={formData.facultyPasscode}
+                        onChange={(e) => setFormData({ ...formData, facultyPasscode: e.target.value.toUpperCase() })}
+                        className="w-full bg-slate-950 border border-emerald-500/40 rounded-xl px-3 py-2 text-emerald-200 placeholder-emerald-500/30 font-mono text-xs focus:outline-none focus:border-emerald-400 tracking-wider"
+                      />
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-[11px] text-emerald-300/90 space-y-1">
+                      <div className="flex items-center gap-1.5 font-bold text-emerald-400">
+                        <ShieldCheck className="w-4 h-4 shrink-0" />
+                        <span>Anti-Impersonation Protection</span>
+                      </div>
+                      <p className="text-slate-300 text-[10.5px] leading-relaxed">
+                        Faculty accounts receive instant event hosting rights. To prevent students from registering under faculty, an official authorization key issued by the Registrar or Dean is required.
+                      </p>
                     </div>
                   </motion.div>
                 )}

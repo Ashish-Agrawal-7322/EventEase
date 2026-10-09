@@ -73,6 +73,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    cabinNumber: {
+      type: String,
+      default: '',
+    },
   },
   {
     timestamps: true,
