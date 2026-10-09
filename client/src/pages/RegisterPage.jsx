@@ -8,9 +8,7 @@ import {
   Lock,
   User,
   GraduationCap,
-  Building,
   Zap,
-  KeyRound,
   ShieldCheck,
   Briefcase,
   CheckCircle2,
@@ -34,9 +32,6 @@ export const RegisterPage = () => {
     role: 'student',
     rollNumber: '',
     department: 'Computer Science',
-    organization: 'Campus Club',
-    clubName: '',
-    collegePasscode: '',
     employeeId: '',
     designation: 'Assistant Professor',
   });
@@ -98,11 +93,6 @@ export const RegisterPage = () => {
 
     if (formData.role === 'faculty' && !formData.employeeId.trim()) {
       setError('Please enter your Faculty / Employee ID');
-      return;
-    }
-
-    if (formData.role === 'organizer' && !formData.clubName.trim()) {
-      setError('Please enter your Club or Student Chapter name');
       return;
     }
 
@@ -344,11 +334,11 @@ export const RegisterPage = () => {
                 {/* Role selector pills */}
                 <div>
                   <label className="block text-slate-300 font-semibold mb-1.5">Campus Identity Role</label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, role: 'student' })}
-                      className={`p-2.5 rounded-xl border flex flex-col sm:flex-row items-center justify-center gap-1.5 font-semibold transition-all ${
+                      className={`p-2.5 rounded-xl border flex items-center justify-center gap-1.5 font-semibold transition-all ${
                         formData.role === 'student'
                           ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.25)]'
                           : 'bg-slate-900 border-white/5 text-slate-400 hover:text-slate-200'
@@ -360,21 +350,8 @@ export const RegisterPage = () => {
 
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, role: 'organizer' })}
-                      className={`p-2.5 rounded-xl border flex flex-col sm:flex-row items-center justify-center gap-1.5 font-semibold transition-all ${
-                        formData.role === 'organizer'
-                          ? 'bg-purple-500/25 border-purple-400 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.25)]'
-                          : 'bg-slate-900 border-white/5 text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      <Building className="w-4 h-4 shrink-0" />
-                      <span className="text-[11px]">Club Lead</span>
-                    </button>
-
-                    <button
-                      type="button"
                       onClick={() => setFormData({ ...formData, role: 'faculty' })}
-                      className={`p-2.5 rounded-xl border flex flex-col sm:flex-row items-center justify-center gap-1.5 font-semibold transition-all ${
+                      className={`p-2.5 rounded-xl border flex items-center justify-center gap-1.5 font-semibold transition-all ${
                         formData.role === 'faculty'
                           ? 'bg-emerald-500/25 border-emerald-400 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
                           : 'bg-slate-900 border-white/5 text-slate-400 hover:text-slate-200'
@@ -585,51 +562,6 @@ export const RegisterPage = () => {
                     </div>
                   </motion.div>
                 )}
-
-                {/* Club Organizer specific verification fields */}
-                {formData.role === 'organizer' && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="space-y-3 p-3.5 rounded-2xl bg-purple-950/20 border border-purple-500/30"
-                  >
-                    <div>
-                      <label className="block text-purple-300 font-semibold mb-1 flex items-center gap-1.5">
-                        <Building className="w-3.5 h-3.5 text-purple-400" />
-                        Club / Student Chapter Name *
-                      </label>
-                      <input
-                        type="text"
-                        required={formData.role === 'organizer'}
-                        placeholder="e.g. Google Developer Student Club MU, IEEE MU"
-                        value={formData.clubName}
-                        onChange={(e) => setFormData({ ...formData, clubName: e.target.value, organization: e.target.value })}
-                        className="w-full bg-slate-900 border border-purple-500/30 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 text-xs"
-                      />
-                    </div>
-
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1 font-mono">
-                          <KeyRound className="w-3.5 h-3.5 text-purple-400" />
-                          Faculty Authorization Key (Optional)
-                        </label>
-                        <span className="text-[10px] text-purple-300 font-mono">Instant Unlock</span>
-                      </div>
-                      <input
-                        type="text"
-                        placeholder="e.g. MARWADI2026 (Optional)"
-                        value={formData.collegePasscode}
-                        onChange={(e) => setFormData({ ...formData, collegePasscode: e.target.value })}
-                        className="w-full bg-slate-950 border border-purple-500/30 rounded-xl px-3 py-2 text-purple-200 placeholder-purple-400/40 text-xs font-mono focus:outline-none focus:border-purple-400"
-                      />
-                      <p className="text-[10px] text-slate-400 mt-1 leading-tight">
-                        🛡️ Have the faculty coordinator key? Enter it for instant organizer access. Otherwise, leave empty to submit for Admin review.
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
-
                 {/* Submit Step 1 Button */}
                 <button
                   type="submit"
