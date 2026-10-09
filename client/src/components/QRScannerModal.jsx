@@ -19,12 +19,17 @@ import {
   Clock,
   ArrowRight,
   ShieldCheck,
-  SwitchCamera
+  SwitchCamera,
+  Upload,
+  Image as ImageIcon,
+  FileUp,
+  FileCheck2,
+  Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const QRScannerModal = ({ event, isOpen, onClose, onCheckInSuccess }) => {
-  const [activeTab, setActiveTab] = useState('camera'); // 'camera' or 'simulate'
+  const [activeTab, setActiveTab] = useState('camera'); // 'camera', 'file', or 'simulate'
   const [manualCode, setManualCode] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null); // { status: 'success' | 'already_checked_in' | 'wrong_event' | 'invalid', message, ticket }
@@ -32,9 +37,17 @@ export const QRScannerModal = ({ event, isOpen, onClose, onCheckInSuccess }) => 
   const [cameraError, setCameraError] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [loadingParticipants, setLoadingParticipants] = useState(false);
+  const [availableCameras, setAvailableCameras] = useState([]);
+  const [selectedCameraId, setSelectedCameraId] = useState('');
+  const [fileScanning, setFileScanning] = useState(false);
+  const [fileError, setFileError] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const scannerRef = useRef(null);
   const html5QrCodeRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const cameraQuickFileInputRef = useRef(null);
 
   // Load participants for the simulation list so evaluators can test instantly without a physical camera!
   useEffect(() => {
@@ -70,7 +83,7 @@ export const QRScannerModal = ({ event, isOpen, onClose, onCheckInSuccess }) => 
     };
   }, [isOpen, activeTab]);
 
-  const startCamera = async () => {
+  const startCamera = async (camId) => {
     setCameraError(null);
     try {
       // Small delay to ensure DOM element is mounted
@@ -87,24 +100,49 @@ export const QRScannerModal = ({ event, isOpen, onClose, onCheckInSuccess }) => 
         const html5QrCode = new Html5Qrcode('qr-reader');
         html5QrCodeRef.current = html5QrCode;
 
+        // Query available video input devices
+        try {
+          const cameras = await Html5Qrcode.getCameras();
+          if (cameras && cameras.length > 0) {
+            setAvailableCameras(cameras);
+            if (!selectedCameraId && !camId) {
+              setSelectedCameraId(cameras[0].id);
+            }
+          }
+        } catch (e) {
+          console.log('Camera list notice:', e);
+        }
+
+        const targetCameraId = camId || selectedCameraId;
+        const targetCam = targetCameraId ? { deviceId: { exact: targetCameraId } } : { facingMode: 'user' };
+
+        // Optimized full-frame configuration:
+        // High 20 FPS, dynamic qrbox covering 88% of viewfinder, native hardware acceleration,
+        // and no forced 1.0 aspectRatio so wide laptop webcams don't squash QR codes!
         const config = {
-          fps: 10,
-          qrbox: { width: 240, height: 240 },
-          aspectRatio: 1.0,
+          fps: 20,
+          qrbox: (viewfinderWidth, viewfinderHeight) => {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            const size = Math.max(200, Math.floor(minEdge * 0.88));
+            return { width: size, height: size };
+          },
+          experimentalFeatures: {
+            useBarCodeDetectorIfSupported: true,
+          },
         };
 
         try {
           await html5QrCode.start(
-            { facingMode: 'environment' },
+            targetCam,
             config,
             (decodedText) => {
               handleQRScanned(decodedText);
             },
-            () => {} // Ignore scan failure frames
+            () => {} // Ignore failure frames
           );
           setIsScanning(true);
         } catch (camErr) {
-          console.warn('Camera start issue, falling back to any camera:', camErr);
+          console.warn('Camera start with target cam failed, retrying fallback:', camErr);
           try {
             await html5QrCode.start(
               true,
@@ -116,7 +154,7 @@ export const QRScannerModal = ({ event, isOpen, onClose, onCheckInSuccess }) => 
             );
             setIsScanning(true);
           } catch (finalCamErr) {
-            setCameraError('Camera access unavailable or blocked. You can use the "Instant Attendee Simulation" tab or type ticket code manually!');
+            setCameraError('Camera access unavailable or blocked. Please allow browser camera access, or use the "Upload QR Image" tab!');
             setIsScanning(false);
           }
         }
@@ -125,6 +163,16 @@ export const QRScannerModal = ({ event, isOpen, onClose, onCheckInSuccess }) => 
       setCameraError('Could not initialize camera: ' + err.message);
       setIsScanning(false);
     }
+  };
+
+  const handleSwitchCamera = async () => {
+    if (availableCameras.length < 2) return;
+    const currentIndex = availableCameras.findIndex((c) => c.id === selectedCameraId);
+    const nextIndex = (currentIndex + 1) % availableCameras.length;
+    const nextCamId = availableCameras[nextIndex].id;
+    setSelectedCameraId(nextCamId);
+    await stopCamera();
+    startCamera(nextCamId);
   };
 
   const stopCamera = async () => {
@@ -136,6 +184,53 @@ export const QRScannerModal = ({ event, isOpen, onClose, onCheckInSuccess }) => 
         // Ignored
       }
       setIsScanning(false);
+    }
+  };
+
+  // Decode QR code directly from an uploaded Image File
+  const handleScanImageFile = async (file) => {
+    if (!file) return;
+    setFileScanning(true);
+    setFileError(null);
+    setImagePreview(URL.createObjectURL(file));
+
+    try {
+      let decodedText = null;
+
+      // 1. Try Html5Qrcode scanFile API
+      try {
+        const fileScanner = new Html5Qrcode('qr-reader-dummy-file');
+        decodedText = await fileScanner.scanFile(file, false);
+        fileScanner.clear();
+      } catch (err) {
+        console.log('Html5Qrcode file scan attempt 1 failed, trying fallback...', err);
+      }
+
+      // 2. Fallback to browser native BarcodeDetector API (hardware accelerated in Chrome/Edge)
+      if (!decodedText && 'BarcodeDetector' in window) {
+        try {
+          const detector = new window.BarcodeDetector({
+            formats: ['qr_code', 'code_128', 'code_39', 'data_matrix'],
+          });
+          const bitmap = await createImageBitmap(file);
+          const barcodes = await detector.detect(bitmap);
+          if (barcodes && barcodes.length > 0) {
+            decodedText = barcodes[0].rawValue;
+          }
+        } catch (detectorErr) {
+          console.log('BarcodeDetector fallback notice:', detectorErr);
+        }
+      }
+
+      if (decodedText) {
+        handleQRScanned(decodedText);
+      } else {
+        setFileError('Could not detect a QR code or barcode in this image. Please ensure the QR code is clearly visible, sharp, and well-lit.');
+      }
+    } catch (err) {
+      setFileError('Failed to read image file: ' + (err.message || 'Unknown error'));
+    } finally {
+      setFileScanning(false);
     }
   };
 
@@ -244,37 +339,71 @@ export const QRScannerModal = ({ event, isOpen, onClose, onCheckInSuccess }) => 
           </button>
         </div>
 
-        {/* Tab Switcher: Real Camera vs Instant Hackathon Simulator */}
+        {/* Tab Switcher: Real Camera vs Upload QR Image vs Instant Hackathon Simulator */}
         <div className="flex border-b border-white/10 bg-slate-950/60 p-1.5 gap-1.5 text-xs font-medium">
           <button
             onClick={() => setActiveTab('camera')}
-            className={`flex-1 py-2 px-3 rounded-xl flex items-center justify-center gap-2 transition-all ${
+            className={`flex-1 py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
               activeTab === 'camera'
-                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-[0_0_15px_rgba(0,240,255,0.2)]'
+                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-[0_0_15px_rgba(0,240,255,0.2)] font-semibold'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
             }`}
           >
             <Camera className="w-4 h-4" />
-            <span>Live Camera Scanner</span>
+            <span>Live Camera</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('file')}
+            className={`flex-1 py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
+              activeTab === 'file'
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.2)] font-semibold'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+            }`}
+          >
+            <Upload className="w-4 h-4" />
+            <span>Upload QR Image</span>
           </button>
 
           <button
             onClick={() => setActiveTab('simulate')}
-            className={`flex-1 py-2 px-3 rounded-xl flex items-center justify-center gap-2 transition-all ${
+            className={`flex-1 py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
               activeTab === 'simulate'
-                ? 'bg-purple-500/25 text-purple-300 border border-purple-500/40 shadow-[0_0_15px_rgba(168,85,247,0.2)]'
+                ? 'bg-purple-500/25 text-purple-300 border border-purple-500/40 shadow-[0_0_15px_rgba(168,85,247,0.2)] font-semibold'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
             }`}
           >
             <Sparkles className="w-4 h-4 text-purple-400" />
-            <span>Instant Attendee Simulator ({participants.length})</span>
+            <span>Simulator ({participants.length})</span>
           </button>
         </div>
 
+        {/* Hidden dummy container for file scanning */}
+        <div id="qr-reader-dummy-file" className="hidden" />
+
         {/* Scanner Content Area */}
         <div className="p-5">
+          {/* TAB 1: LIVE CAMERA */}
           {activeTab === 'camera' && (
             <div className="space-y-4">
+              {/* Camera Header controls */}
+              <div className="flex items-center justify-between text-xs px-1 text-slate-400">
+                <span className="flex items-center gap-1 font-mono text-cyan-400 text-[11px]">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" />
+                  Point camera at student QR code
+                </span>
+                {availableCameras.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={handleSwitchCamera}
+                    className="flex items-center gap-1 text-slate-300 hover:text-cyan-300 transition-colors bg-slate-900 px-2.5 py-1 rounded-lg border border-white/10"
+                  >
+                    <SwitchCamera className="w-3.5 h-3.5" />
+                    <span>Switch Camera</span>
+                  </button>
+                )}
+              </div>
+
               {/* Camera Viewfinder with Cyber HUD overlay */}
               <div className="relative mx-auto max-w-sm aspect-square rounded-2xl overflow-hidden bg-black/90 border-2 border-cyan-500/40 shadow-[0_0_30px_rgba(0,240,255,0.15)] flex flex-col items-center justify-center">
                 <div id="qr-reader" className="w-full h-full" />
@@ -297,21 +426,153 @@ export const QRScannerModal = ({ event, isOpen, onClose, onCheckInSuccess }) => 
                 </div>
 
                 {cameraError && (
-                  <div className="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center p-6 text-center z-30">
-                    <AlertTriangle className="w-10 h-10 text-amber-400 mb-2" />
-                    <p className="text-xs text-slate-300 mb-3">{cameraError}</p>
+                  <div className="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center p-6 text-center z-30 space-y-2">
+                    <AlertTriangle className="w-10 h-10 text-amber-400 mx-auto" />
+                    <p className="text-xs text-slate-300">{cameraError}</p>
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        onClick={() => setActiveTab('file')}
+                        className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-lg flex items-center gap-1.5"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Upload QR Image</span>
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('simulate')}
+                        className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg"
+                      >
+                        Simulator
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Image Upload Alternative */}
+              <div className="text-center">
+                <input
+                  ref={cameraQuickFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleScanImageFile(file);
+                    e.target.value = '';
+                  }}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => cameraQuickFileInputRef.current?.click()}
+                  disabled={fileScanning || processing}
+                  className="inline-flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 hover:underline transition-colors font-mono py-1 px-3 rounded-lg bg-cyan-950/40 border border-cyan-500/20"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>{fileScanning ? 'Scanning Image...' : 'Or Upload / Screenshot QR Code directly'}</span>
+                </button>
+              </div>
+
+              {/* Manual Ticket Input */}
+              <form onSubmit={handleManualSubmit} className="flex gap-2 max-w-sm mx-auto pt-1">
+                <input
+                  type="text"
+                  placeholder="Enter Ticket Code (e.g. EE-HACK-...)"
+                  value={manualCode}
+                  onChange={(e) => setManualCode(e.target.value)}
+                  className="flex-1 bg-slate-900/90 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-cyan-400"
+                />
+                <button
+                  type="submit"
+                  disabled={processing || !manualCode.trim()}
+                  className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs disabled:opacity-50 transition-all font-mono"
+                >
+                  Verify
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* TAB 2: UPLOAD IMAGE SCANNER */}
+          {activeTab === 'file' && (
+            <div className="space-y-4 max-w-md mx-auto">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleScanImageFile(file);
+                  e.target.value = '';
+                }}
+                className="hidden"
+              />
+
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDragging(false);
+                  const file = e.dataTransfer.files?.[0];
+                  if (file) handleScanImageFile(file);
+                }}
+                onClick={() => fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
+                  isDragging
+                    ? 'border-emerald-400 bg-emerald-950/40 scale-[1.01]'
+                    : 'border-cyan-500/30 hover:border-cyan-400 bg-slate-950/70 hover:bg-slate-900/80'
+                }`}
+              >
+                {imagePreview ? (
+                  <div className="space-y-3">
+                    <div className="relative mx-auto w-44 h-44 rounded-xl overflow-hidden border border-white/20 bg-black">
+                      <img src={imagePreview} alt="Uploaded QR" className="w-full h-full object-contain" />
+                      {fileScanning && (
+                        <div className="scanner-laser pointer-events-none z-20" />
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-300 font-mono">
+                      {fileScanning ? 'Scanning barcode...' : 'Click or drop another image to scan'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                      <FileUp className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white font-cyber">
+                        Upload or Drop QR Code / Barcode Image
+                      </h4>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Select a pass screenshot, photo of student ID pass, or PNG/JPEG graphic.
+                      </p>
+                    </div>
                     <button
-                      onClick={() => setActiveTab('simulate')}
-                      className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg"
+                      type="button"
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-600 text-white font-bold text-xs shadow-lg hover:brightness-110 font-cyber transition-all"
                     >
-                      Switch to Instant Simulator Tab
+                      Browse Files
                     </button>
                   </div>
                 )}
               </div>
 
+              {fileError && (
+                <div className="p-3 rounded-xl bg-red-950/70 border border-red-500/50 flex items-start gap-2.5 text-xs text-red-200">
+                  <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <span className="font-semibold block">Scan Notice</span>
+                    <span>{fileError}</span>
+                  </div>
+                </div>
+              )}
+
               {/* Manual Ticket Input */}
-              <form onSubmit={handleManualSubmit} className="flex gap-2 max-w-sm mx-auto">
+              <form onSubmit={handleManualSubmit} className="flex gap-2 pt-1">
                 <input
                   type="text"
                   placeholder="Enter Ticket Code (e.g. EE-HACK-...)"

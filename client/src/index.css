@@ -136,6 +136,21 @@
   animation: laserSweep 2.2s ease-in-out infinite;
 }
 
+/* HTML5 QR Code Styling */
+#qr-reader {
+  border: none !important;
+}
+#qr-reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 1rem;
+}
+#qr-reader img[alt="Info icon"],
+#qr-reader__dashboard_section_csr {
+  display: none !important;
+}
+
 /* Grid background */
 .bg-cyber-grid {
   background-image: 
