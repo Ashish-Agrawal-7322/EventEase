@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const VALID_FACULTY_KEYS = ['MU-FAC-2026', 'FACULTY2026', 'MU-FACULTY', 'MARWADI2026', 'DEAN-OFFICE-2026'];
+
 export const RegisterPage = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -104,15 +106,25 @@ export const RegisterPage = () => {
         setError('Please enter your Faculty Office / Cabin Location (e.g. Room 304, Block A)');
         return;
       }
-      if (!formData.facultyPasscode.trim()) {
+      const enteredCode = (formData.facultyPasscode || '').trim().toUpperCase();
+      if (!enteredCode) {
         setError('Please enter the confidential Faculty Institutional Access Key issued by the Dean / Registrar Office.');
+        return;
+      }
+      if (!VALID_FACULTY_KEYS.includes(enteredCode)) {
+        setError('❌ Wrong Access Key! The Faculty Institutional Access Key you entered is invalid. Please enter the official Dean / Registrar key (MU-FAC-2026).');
         return;
       }
     }
 
     setOtpLoading(true);
     try {
-      const res = await api.auth.sendRegistrationOtp(formData.email.trim(), formData.name.trim(), formData.role);
+      const res = await api.auth.sendRegistrationOtp(
+        formData.email.trim(),
+        formData.name.trim(),
+        formData.role,
+        formData.facultyPasscode.trim().toUpperCase()
+      );
       if (res.success) {
         setOtpSent(true);
         setResendTimer(60);
@@ -614,8 +626,34 @@ export const RegisterPage = () => {
                         placeholder="e.g. MU-FAC-2026"
                         value={formData.facultyPasscode}
                         onChange={(e) => setFormData({ ...formData, facultyPasscode: e.target.value.toUpperCase() })}
-                        className="w-full bg-slate-950 border border-emerald-500/40 rounded-xl px-3 py-2 text-emerald-200 placeholder-emerald-500/30 font-mono text-xs focus:outline-none focus:border-emerald-400 tracking-wider"
+                        className={`w-full bg-slate-950 border rounded-xl px-3 py-2 text-xs font-mono tracking-wider transition-all focus:outline-none ${
+                          !formData.facultyPasscode
+                            ? 'border-emerald-500/40 text-emerald-200 placeholder-emerald-500/30 focus:border-emerald-400'
+                            : VALID_FACULTY_KEYS.includes(formData.facultyPasscode.trim().toUpperCase())
+                            ? 'border-emerald-400 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                            : 'border-red-500 text-red-300 shadow-[0_0_15px_rgba(239,68,68,0.25)]'
+                        }`}
                       />
+                      {formData.facultyPasscode && !VALID_FACULTY_KEYS.includes(formData.facultyPasscode.trim().toUpperCase()) && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-1.5 flex items-center gap-1.5 text-[11px] text-red-400 font-mono bg-red-950/70 p-2 rounded-xl border border-red-500/50"
+                        >
+                          <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                          <span>Wrong Access Key! Please enter the official Dean Key (MU-FAC-2026).</span>
+                        </motion.div>
+                      )}
+                      {formData.facultyPasscode && VALID_FACULTY_KEYS.includes(formData.facultyPasscode.trim().toUpperCase()) && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-1.5 flex items-center gap-1.5 text-[11px] text-emerald-400 font-mono"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <span>✓ Verified Dean Institutional Access Key</span>
+                        </motion.div>
+                      )}
                     </div>
 
                     <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-[11px] text-emerald-300/90 space-y-1">

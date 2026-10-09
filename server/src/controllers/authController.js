@@ -29,7 +29,7 @@ export const isUniversityEmail = (email) => {
  */
 export const sendRegistrationOtp = async (req, res) => {
   try {
-    const { email, name, role } = req.body;
+    const { email, name, role, facultyPasscode } = req.body;
     if (!email) {
       return res.status(400).json({ success: false, message: 'Please provide an email address' });
     }
@@ -42,6 +42,25 @@ export const sendRegistrationOtp = async (req, res) => {
         success: false,
         message: 'Please enter your official Marwadi University email address (@marwadiuniversity.ac.in). Personal emails like Gmail or Yahoo are not allowed.',
       });
+    }
+
+    // 1.5 If registering as Faculty, strictly validate the Faculty Institutional Access Key
+    if (role === 'faculty') {
+      const validFacultyCodes = [
+        (process.env.FACULTY_ACCESS_CODE || 'MU-FAC-2026').trim().toUpperCase(),
+        'MU-FAC-2026',
+        'FACULTY2026',
+        'MU-FACULTY',
+        'MARWADI2026',
+        'DEAN-OFFICE-2026',
+      ];
+      const code = (facultyPasscode || '').trim().toUpperCase();
+      if (!code || !validFacultyCodes.includes(code)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Wrong Faculty Access Key! The access key provided is invalid. Please enter the official Dean / Registrar key (MU-FAC-2026).',
+        });
+      }
     }
 
     // 2. Check if user already exists
@@ -185,7 +204,7 @@ export const register = async (req, res) => {
       if (!providedCode || !validFacultyCodes.includes(providedCode)) {
         return res.status(400).json({
           success: false,
-          message: 'Invalid or missing Faculty Institutional Access Key. Faculty registration requires the official authorization key issued by the Registrar or Dean to prevent student impersonation.',
+          message: 'Wrong Faculty Access Key! The access key provided is invalid. Please enter the official Dean / Registrar key (MU-FAC-2026).',
         });
       }
 
