@@ -64,6 +64,7 @@ export const OrganizerDashboardPage = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [issuingCertificates, setIssuingCertificates] = useState(false);
   const [certSuccessMsg, setCertSuccessMsg] = useState('');
+  const [adminViewScope, setAdminViewScope] = useState('mine'); // 'mine' or 'all' (only for admin)
 
   const handleApplyCopilotData = (aiData) => {
     setFormData((prev) => ({
@@ -186,18 +187,27 @@ export const OrganizerDashboardPage = () => {
 
   useEffect(() => {
     loadOrganizerEvents();
-  }, []);
+  }, [user, adminViewScope]);
 
   const loadOrganizerEvents = async () => {
     setLoading(true);
     try {
-      // Get all events; organizer can manage events
-      const res = await api.events.getAll();
+      const params = {};
+      // Individual Organizer Hub: non-admins only see events they personally created
+      if (user?.role !== 'admin' || adminViewScope === 'mine') {
+        params.organizerOnly = 'true';
+      }
+      const res = await api.events.getAll(params);
       if (res.success) {
         setEvents(res.events);
-        if (!selectedEventForParticipants && res.events.length > 0) {
-          setSelectedEventForParticipants(res.events[0]);
-          loadParticipants(res.events[0]._id);
+        if (res.events.length > 0) {
+          if (!selectedEventForParticipants || !res.events.some((e) => e._id === selectedEventForParticipants._id)) {
+            setSelectedEventForParticipants(res.events[0]);
+            loadParticipants(res.events[0]._id);
+          }
+        } else {
+          setSelectedEventForParticipants(null);
+          setParticipants([]);
         }
       }
     } catch (err) {
@@ -386,14 +396,72 @@ export const OrganizerDashboardPage = () => {
 
         {/* Managed Events Cards */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-extrabold text-white font-cyber tracking-wider">
-              YOUR CAMPUS EVENTS ({events.length})
-            </h2>
-            <span className="text-xs text-slate-400">Select an event below to scan tickets or view analytics</span>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-extrabold text-white font-cyber tracking-wider">
+                  YOUR MANAGED EVENTS ({events.length})
+                </h2>
+                {user && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                    Host: {user.name}
+                  </span>
+                )}
+              </div>
+              <span className="text-xs text-slate-400">
+                {user?.role === 'admin' && adminViewScope === 'all'
+                  ? 'Showing all college events across the institution (Admin Oversight)'
+                  : `Displaying events created and operated under ${user?.name || 'your'} profile`}
+              </span>
+            </div>
+
+            {user?.role === 'admin' && (
+              <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-white/10 text-xs font-mono">
+                <button
+                  onClick={() => setAdminViewScope('mine')}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${
+                    adminViewScope === 'mine'
+                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  My Events
+                </button>
+                <button
+                  onClick={() => setAdminViewScope('all')}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${
+                    adminViewScope === 'all'
+                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  All Campus Events
+                </button>
+              </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {events.length === 0 ? (
+            <div className="cyber-glass rounded-3xl p-10 text-center border border-white/10 max-w-lg mx-auto space-y-4 my-6">
+              <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mx-auto text-cyan-400">
+                <Calendar className="w-7 h-7" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white font-cyber">No Events Published Yet</h3>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  You haven't created any events under your account (<strong className="text-white">{user?.name}</strong>). Each organizer has their own individual hub.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-bold text-xs shadow-lg hover:brightness-110 transition-all font-cyber"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Launch New Event</span>
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {events.map((ev) => {
               const isSelected = selectedEventForParticipants?._id === ev._id;
               const fillRate = ev.fillRate || 0;
@@ -487,6 +555,7 @@ export const OrganizerDashboardPage = () => {
               );
             })}
           </div>
+          )}
         </div>
 
         {/* Selected Event Attendee Management Panel */}

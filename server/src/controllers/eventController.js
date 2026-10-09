@@ -16,9 +16,7 @@ export const getEvents = async (req, res) => {
     }
 
     if (organizerOnly === 'true' && req.user) {
-      if (req.user.role === 'organizer' || req.user.role === 'student') {
-        filter.organizer = req.user._id;
-      }
+      filter.organizer = req.user._id;
     } else if (!req.user || req.user.role !== 'admin') {
       filter.$or = [
         { approvalStatus: 'approved' },
