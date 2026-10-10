@@ -10,6 +10,8 @@ if (dns && dns.setDefaultResultOrder) {
 // Cache transporter instance
 let transporter = null;
 
+const getAppUrl = () => (process.env.APP_URL ? process.env.APP_URL.replace(/\/$/, '') : 'http://localhost:5173');
+
 const getTransporter = async () => {
   if (transporter) return transporter;
 
@@ -369,7 +371,7 @@ export const sendOrganizerApprovalEmail = async ({ to, studentName, clubName, ro
             </ul>
 
             <div style="text-align: center; margin-top: 24px;">
-              <a href="http://localhost:5173/organizer" class="btn">Go to Organizer Command Hub →</a>
+              <a href="${getAppUrl()}/organizer" class="btn">Go to Organizer Command Hub →</a>
             </div>
 
             <div class="footer">
@@ -583,7 +585,7 @@ export const sendWelcomeAccountEmail = async ({ to, name, role, department, roll
             <p>You can now browse campus hackathons, technical workshops, cultural fests, and get instant digital holographic passes sent directly to this inbox.</p>
 
             <div style="text-align: center; margin-top: 20px;">
-              <a href="http://localhost:5173" class="btn">Explore Campus Events →</a>
+              <a href="${getAppUrl()}" class="btn">Explore Campus Events →</a>
             </div>
 
             <div class="footer">
@@ -670,7 +672,7 @@ export const sendEventApprovalEmail = async ({ to, studentName, event, adminFeed
             <p style="font-size: 13px; color: #94a3b8;">You now have access to the Organizer Hub to view registrations, scan attendee QR passes with the HUD laser scanner, and download attendance spreadsheets.</p>
 
             <div style="text-align: center; margin-top: 16px;">
-              <a href="http://localhost:5173/events/${event._id}" class="btn">View Live Event Page →</a>
+              <a href="${getAppUrl()}/events/${event._id}" class="btn">View Live Event Page →</a>
             </div>
 
             <div class="footer">
