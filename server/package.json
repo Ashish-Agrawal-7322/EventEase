@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch-path=src src/server.js",
+    "clean-db": "node reset-db.js",
     "test": "node test-flow.js"
   },
   "dependencies": {
