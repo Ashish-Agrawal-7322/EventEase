@@ -43,6 +43,7 @@ export const RegisterPage = () => {
   });
 
   const [otp, setOtp] = useState('');
+  const [receivedOtp, setReceivedOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
@@ -128,6 +129,9 @@ export const RegisterPage = () => {
       if (res.success) {
         setOtpSent(true);
         setResendTimer(60);
+        if (res.otp) {
+          setReceivedOtp(res.otp);
+        }
         setSuccessNotice(res.message || `Verification code sent to ${formData.email}!`);
       } else {
         setError(res.message || 'Failed to dispatch verification code');
@@ -243,6 +247,7 @@ export const RegisterPage = () => {
                   onClick={() => {
                     setOtpSent(false);
                     setOtp('');
+                    setReceivedOtp('');
                     setError('');
                   }}
                   className="text-[11px] text-cyan-400 hover:text-cyan-300 font-mono hover:underline flex items-center gap-1"
@@ -251,6 +256,31 @@ export const RegisterPage = () => {
                   <span>Change Email</span>
                 </button>
               </div>
+
+              {/* Instant Hackathon Demo / Network Fallback OTP Card */}
+              {receivedOtp && (
+                <div className="p-4 rounded-2xl bg-cyan-950/60 border border-cyan-400/50 text-center space-y-2.5 shadow-[0_0_25px_rgba(0,240,255,0.25)]">
+                  <div className="flex items-center justify-center gap-1.5 text-xs font-mono font-bold text-cyan-300">
+                    <Sparkles className="w-4 h-4 text-cyan-400" />
+                    <span>Campus Verification Passcode Generated:</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-3">
+                    <span className="font-mono text-2xl font-black text-white tracking-[6px] bg-slate-900 px-4 py-1.5 rounded-xl border border-cyan-400/60 shadow-inner">
+                      {receivedOtp}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setOtp(receivedOtp)}
+                      className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:brightness-110 text-slate-950 font-bold text-xs font-mono transition-all shadow-[0_0_15px_rgba(0,240,255,0.4)] active:scale-95"
+                    >
+                      Auto-Fill Code
+                    </button>
+                  </div>
+                  <p className="text-[10.5px] text-slate-300 font-mono">
+                    (Network bypass: Enter this code if your Wi-Fi blocks or delays Gmail SMTP delivery)
+                  </p>
+                </div>
+              )}
 
               {/* OTP Form */}
               <form onSubmit={handleStep2VerifyOtp} className="space-y-4">

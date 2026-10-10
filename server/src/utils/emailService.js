@@ -14,15 +14,19 @@ const getTransporter = async () => {
         host: process.env.SMTP_HOST,
         port: Number(process.env.SMTP_PORT) || 587,
         secure: process.env.SMTP_SECURE === 'true',
+        connectionTimeout: 4000,
+        socketTimeout: 4000,
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
       });
     } else {
-      // Default to Gmail service
+      // Default to Gmail service with short timeout
       transporter = nodemailer.createTransport({
         service: 'gmail',
+        connectionTimeout: 4000,
+        socketTimeout: 4000,
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,

@@ -24,6 +24,7 @@ export const ForgotPasswordPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const [step, setStep] = useState(1); // 1 = Request OTP, 2 = Verify OTP & Reset
+  const [receivedOtp, setReceivedOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
   const [error, setError] = useState('');
@@ -56,6 +57,9 @@ export const ForgotPasswordPage = () => {
       if (res.success) {
         setStep(2);
         setResendTimer(60);
+        if (res.otp) {
+          setReceivedOtp(res.otp);
+        }
         setSuccess(res.message || `Password reset code sent to ${email}`);
       } else {
         setError(res.message || 'Failed to dispatch reset code');
@@ -209,6 +213,26 @@ export const ForgotPasswordPage = () => {
                 Change
               </button>
             </div>
+
+            {receivedOtp && (
+              <div className="p-3.5 rounded-2xl bg-red-950/40 border border-red-500/40 text-center space-y-2">
+                <span className="text-[11px] font-mono text-red-300 font-bold block">
+                  Password Reset Passcode:
+                </span>
+                <div className="flex items-center justify-center gap-3">
+                  <span className="font-mono text-2xl font-black text-white tracking-[6px] bg-slate-900 px-3.5 py-1 rounded-xl border border-red-500/50">
+                    {receivedOtp}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setOtp(receivedOtp)}
+                    className="px-3 py-1 rounded-xl bg-red-500 hover:bg-red-400 text-white font-bold text-xs font-mono transition-all"
+                  >
+                    Auto-Fill
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="block text-slate-300 font-semibold mb-1">
