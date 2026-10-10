@@ -15,16 +15,13 @@ import {
   Building,
   Clock,
   Briefcase,
-  CalendarPlus,
-  Award
+  CalendarPlus
 } from 'lucide-react';
 import { ClubApplicationModal } from './ClubApplicationModal';
-import { CertificateVaultModal } from './CertificateVaultModal';
 
 export const Navbar = () => {
   const { user, logout, isOrganizer, isAdmin } = useAuth();
   const [showClubModal, setShowClubModal] = React.useState(false);
-  const [showCertVault, setShowCertVault] = React.useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -88,18 +85,6 @@ export const Navbar = () => {
                 <Ticket className="w-4 h-4 text-purple-400" />
                 <span>My Tickets</span>
               </Link>
-            )}
-
-            {/* Direct Certificate Vault Button */}
-            {user && !user.isFaculty && (
-              <button
-                onClick={() => setShowCertVault(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition-all cursor-pointer shadow-sm"
-                title="View & Download Official Certificates of Participation"
-              >
-                <Award className="w-4 h-4 text-amber-400" />
-                <span>Certificates</span>
-              </button>
             )}
 
             {/* Faculty Dedicated Academic Hub Link */}
@@ -244,12 +229,6 @@ export const Navbar = () => {
             window.location.reload();
           }, 1500);
         }}
-      />
-
-      {/* Global Digital Certificate Credential Vault Modal */}
-      <CertificateVaultModal
-        isOpen={showCertVault}
-        onClose={() => setShowCertVault(false)}
       />
     </nav>
   );
