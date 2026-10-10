@@ -1,5 +1,11 @@
+import dns from 'dns';
 import nodemailer from 'nodemailer';
 import QRCode from 'qrcode';
+
+// Prefer IPv6 if available, which allows connecting to smtp.gmail.com reliably
+if (dns && dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('verbatim');
+}
 
 // Cache transporter instance
 let transporter = null;
@@ -14,22 +20,27 @@ const getTransporter = async () => {
         host: process.env.SMTP_HOST,
         port: Number(process.env.SMTP_PORT) || 587,
         secure: process.env.SMTP_SECURE === 'true',
-        connectionTimeout: 4000,
-        socketTimeout: 4000,
+        connectionTimeout: 10000,
+        socketTimeout: 10000,
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
       });
     } else {
-      // Default to Gmail service with short timeout
+      // Direct Gmail SMTP over SSL on port 465
       transporter = nodemailer.createTransport({
-        service: 'gmail',
-        connectionTimeout: 4000,
-        socketTimeout: 4000,
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        connectionTimeout: 15000,
+        socketTimeout: 15000,
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
+        },
+        tls: {
+          rejectUnauthorized: false,
         },
       });
     }
@@ -440,8 +451,8 @@ export const sendRegistrationOtpEmail = async ({ to, name, otp }) => {
       console.log(`[RegistrationOtp] Sent to ${to}: ${info.messageId}`);
       return { success: true, messageId: info.messageId };
     } else {
-      console.log(`[RegistrationOtp-Simulated] Sent to ${to}: OTP is ${otp}`);
-      return { success: true, simulated: true, otp };
+      console.error(`[RegistrationOtp] No email transport configured for sending OTP to ${to}`);
+      return { success: false, error: 'Email transport is not configured' };
     }
   } catch (err) {
     console.error(`[RegistrationOtp] Failed to send to ${to}:`, err.message);
@@ -505,8 +516,8 @@ export const sendForgotPasswordOtpEmail = async ({ to, name, otp }) => {
       console.log(`[ForgotOtp] Sent to ${to}: ${info.messageId}`);
       return { success: true, messageId: info.messageId };
     } else {
-      console.log(`[ForgotOtp-Simulated] Sent to ${to}: OTP is ${otp}`);
-      return { success: true, simulated: true, otp };
+      console.error(`[ForgotOtp] No email transport configured for sending OTP to ${to}`);
+      return { success: false, error: 'Email transport is not configured' };
     }
   } catch (err) {
     console.error(`[ForgotOtp] Failed to send to ${to}:`, err.message);

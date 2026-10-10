@@ -104,12 +104,9 @@ export const sendRegistrationOtp = async (req, res) => {
 
     return res.json({
       success: true,
-      message: emailResult.success
-        ? `A 6-digit verification code has been dispatched to ${cleanEmail}. Please check your inbox and spam folder.`
-        : `Verification code generated! (If your local network blocks Gmail SMTP, your code is: ${otp})`,
+      message: `A 6-digit verification code has been dispatched to ${cleanEmail}. Please check your Gmail inbox and spam folder.`,
       email: cleanEmail,
       emailDelivered: emailResult.success || false,
-      otp, // Fallback OTP so user & jury never get stuck when network blocks SMTP!
     });
   } catch (error) {
     console.error('sendRegistrationOtp error:', error);
@@ -378,12 +375,9 @@ export const sendForgotPasswordOtp = async (req, res) => {
 
     return res.json({
       success: true,
-      message: emailResult.success
-        ? `Password reset OTP has been sent to ${cleanEmail}. Please check your inbox and spam folder.`
-        : `Password reset code generated! (If local network blocks SMTP, your code is: ${otp})`,
+      message: `Password reset OTP has been sent to ${cleanEmail}. Please check your Gmail inbox and spam folder.`,
       email: cleanEmail,
       emailDelivered: emailResult.success || false,
-      otp,
     });
   } catch (error) {
     console.error('sendForgotPasswordOtp error:', error);

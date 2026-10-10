@@ -1,8 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import dns from 'dns';
 import { connectDB, getDBStatus } from './config/db.js';
 import { seedDatabase } from './seeds/seedData.js';
+
+// Prefer IPv6 on modern networks to avoid ISP-blocked IPv4 SMTP ports
+dns.setDefaultResultOrder('verbatim');
 
 import authRoutes from './routes/authRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
