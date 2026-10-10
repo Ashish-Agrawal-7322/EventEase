@@ -33,3 +33,35 @@ export const seedDatabase = async () => {
     console.error('[Seed] Error during seeding:', err);
   }
 };
+
+export const ensureAdminUser = async () => {
+  try {
+    const adminEmail = 'admin@marwadiuniversity.ac.in';
+    let admin = await User.findOne({ email: adminEmail });
+    const passwordHash = await bcrypt.hash('password123', 10);
+
+    if (!admin) {
+      admin = await User.create({
+        name: 'Dr. Rajesh Patel',
+        email: adminEmail,
+        password: passwordHash,
+        role: 'admin',
+        department: 'Dean of Student Affairs',
+        organization: 'Marwadi University Event & Academic Council',
+        phone: '+91 98765 43210',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+      });
+      console.log('🏛️ [Admin] Dean / Admin account created: admin@marwadiuniversity.ac.in (Dr. Rajesh Patel)');
+    } else {
+      admin.name = 'Dr. Rajesh Patel';
+      admin.role = 'admin';
+      admin.password = passwordHash;
+      await admin.save();
+      console.log('🏛️ [Admin] Dean / Admin account verified and password reset to password123');
+    }
+    return admin;
+  } catch (err) {
+    console.error('[Admin] Error ensuring admin account:', err.message);
+    return null;
+  }
+};

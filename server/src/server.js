@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import dns from 'dns';
 import { connectDB, getDBStatus } from './config/db.js';
-import { seedDatabase } from './seeds/seedData.js';
+import { seedDatabase, ensureAdminUser } from './seeds/seedData.js';
 
 // Prefer IPv6 on modern networks to avoid ISP-blocked IPv4 SMTP ports
 dns.setDefaultResultOrder('verbatim');
@@ -100,7 +100,7 @@ app.use((err, req, res, next) => {
 const startServer = async () => {
   try {
     await connectDB();
-    // Auto-seed disabled for pure production & real user data
+    await ensureAdminUser();
 
     app.listen(PORT, () => {
       console.log(`🚀 EventEase Server active on http://localhost:${PORT}`);

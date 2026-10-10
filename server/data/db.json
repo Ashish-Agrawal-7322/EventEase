@@ -1,6 +1,74 @@
 {
-  "users": [],
-  "events": [],
+  "users": [
+    {
+      "name": "Rahul Kumar",
+      "email": "rahulkumar.128721@marwadiuniversity.ac.in",
+      "password": "$2b$10$vfRg1vJYdrriz7AD.m0sueEHxYdGcHY8i5TtFpnzq/edaoZZjetB6",
+      "role": "student",
+      "organizerStatus": "none",
+      "clubDetails": {},
+      "isFaculty": false,
+      "designation": "Assistant Professor",
+      "employeeId": "",
+      "cabinNumber": "",
+      "rollNumber": "112",
+      "department": "Computer Science",
+      "phone": "",
+      "organization": "Campus Community",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=Rahul%20Kumar",
+      "_id": "75cbe3f86b2f0857",
+      "id": "75cbe3f86b2f0857",
+      "createdAt": "2026-10-10T04:04:36.169Z",
+      "updatedAt": "2026-10-10T04:04:36.170Z"
+    },
+    {
+      "name": "Dr. Rajesh Patel",
+      "email": "admin@marwadiuniversity.ac.in",
+      "password": "$2b$10$Pg/NA7OdVzzjqkW6l0dYeODspBkskjqDSnNZ5wykv52k4Dx7oA6Ym",
+      "role": "admin",
+      "department": "Dean of Student Affairs",
+      "organization": "Marwadi University Event & Academic Council",
+      "phone": "+91 98765 43210",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+      "_id": "a4c7ee34ab9a8a82",
+      "id": "a4c7ee34ab9a8a82",
+      "createdAt": "2026-10-10T04:22:20.139Z",
+      "updatedAt": "2026-10-10T04:22:20.140Z"
+    }
+  ],
+  "events": [
+    {
+      "title": "A 36 hour hackathon in atmiya university 2026",
+      "tagline": "Intensive hands-on collegiate hackathon designed for modern engineers and innovators.",
+      "description": "### 🚀 Event Overview\nWelcome to **A 36 hour hackathon in atmiya university 2026**, a flagship collegiate experience organized for Marwadi University students. Whether you are building from scratch or refining your skills, this session is engineered to provide practical mastery, peer collaboration, and verified credentials.\n\n### ⏱️ Detailed Event Agenda\n- **10:00 AM - 10:30 AM**: Gate Check-in & Holographic QR Pass Verification at Entry Gate\n- **10:30 AM - 11:15 AM**: Keynote Briefing & Industry Mentor Orientation\n- **11:15 AM - 01:00 PM**: Hands-on Sprint & Collaborative Prototyping Phase 1\n- **01:00 PM - 02:00 PM**: Networking Lunch & Campus Chapter Meetup\n- **02:00 PM - 03:30 PM**: Deep Dive Lab & Live Coding / Demonstration\n- **03:30 PM - 04:00 PM**: Showcase, Faculty Review & Digital Certificate Awarding\n\n### 🎒 Prerequisites & Equipment\n- Personal laptop with charger and Wi-Fi enabled\n- Basic familiarity with collegiate course topics\n- Official Marwadi University student ID pass\n\n### 🏆 Participant Benefits\n- Cryptographic Digital Certificate of Participation (verifiable via QR code)\n- Mentorship from club leads and faculty advisors\n- Activity / Accreditation credit points for your academic profile",
+      "category": "Hackathon",
+      "venue": "Auditourium",
+      "date": "2026-10-24",
+      "startTime": "10:00 AM",
+      "endTime": "04:00 PM",
+      "registrationDeadline": "2026-10-20",
+      "capacity": 120,
+      "registeredCount": 0,
+      "checkedInCount": 0,
+      "organizer": "75cbe3f86b2f0857",
+      "organizerName": "Rahul Kumar (Campus Community)",
+      "isFacultySponsored": false,
+      "bannerImage": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&auto=format&fit=crop&q=80",
+      "status": "upcoming",
+      "approvalStatus": "pending",
+      "submittedByRole": "student",
+      "tags": [
+        "Marwadi University",
+        "Hackathon",
+        "Innovation",
+        "Hands-On"
+      ],
+      "_id": "204c8e9aaa33cd18",
+      "id": "204c8e9aaa33cd18",
+      "createdAt": "2026-10-10T04:06:37.012Z",
+      "updatedAt": "2026-10-10T04:06:37.012Z"
+    }
+  ],
   "registrations": [],
   "otps": []
 }
