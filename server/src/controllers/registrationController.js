@@ -117,13 +117,35 @@ export const getMyTickets = async (req, res) => {
     const userId = req.user._id;
     const registrations = await Registration.find({ user: userId }).sort({ registeredAt: -1 }).populate('event');
 
+    const certificates = await Certificate.find({ user: userId });
+    const certMap = new Map();
+    certificates.forEach((c) => certMap.set(c.event.toString(), c));
+
     const enrichedTickets = await Promise.all(
       registrations.map(async (reg) => {
         const item = reg.toObject ? reg.toObject() : reg;
         const qrDataUrl = await generateQRCodeDataURL(item.qrPayload || item.ticketCode);
+
+        const eventIdStr = (item.event?._id || item.event)?.toString();
+        let cert = certMap.get(eventIdStr);
+
+        // Auto-generate certificate if checked in and not yet issued
+        if (!cert && item.status === 'checked_in' && item.event) {
+          try {
+            cert = await createCertificateForRegistration(reg, item.event);
+            if (cert) {
+              certMap.set(eventIdStr, cert);
+            }
+          } catch (e) {
+            console.warn('Auto cert in getMyTickets:', e.message);
+          }
+        }
+
         return {
           ...item,
           qrDataUrl,
+          certificateId: cert?.certificateId || null,
+          verificationUrl: cert?.verificationUrl || null,
         };
       })
     );

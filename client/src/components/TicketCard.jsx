@@ -17,6 +17,7 @@ import {
   Award
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 export const TicketCard = ({ ticket, onOpenModal, onOpenVault }) => {
   const [copied, setCopied] = useState(false);
@@ -153,14 +154,26 @@ export const TicketCard = ({ ticket, onOpenModal, onOpenVault }) => {
         </div>
 
         <div className="flex items-center gap-2">
-          {isCheckedIn && onOpenVault && (
-            <button
-              onClick={onOpenVault}
-              className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 text-amber-300 text-[11px] font-bold border border-amber-500/40 transition-all flex items-center gap-1 shadow-sm cursor-pointer"
-              title="View your verified Certificate of Participation"
-            >
-              <Award className="w-3 h-3 text-amber-400" /> Certificate
-            </button>
+          {isCheckedIn && (
+            ticket.certificateId ? (
+              <Link
+                to={`/verify/${ticket.certificateId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 text-amber-300 text-[11px] font-bold border border-amber-500/40 transition-all flex items-center gap-1 shadow-sm cursor-pointer"
+                title="Download or View verified Certificate of Participation"
+              >
+                <Award className="w-3 h-3 text-amber-400" /> Certificate
+              </Link>
+            ) : onOpenVault ? (
+              <button
+                onClick={onOpenVault}
+                className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 text-amber-300 text-[11px] font-bold border border-amber-500/40 transition-all flex items-center gap-1 shadow-sm cursor-pointer"
+                title="View your verified Certificate of Participation"
+              >
+                <Award className="w-3 h-3 text-amber-400" /> Certificate
+              </button>
+            ) : null
           )}
           {onOpenModal && (
             <button
