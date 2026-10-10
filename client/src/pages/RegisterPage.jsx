@@ -20,6 +20,7 @@ import {
   School,
   AlertCircle,
   Building2,
+  Sparkles,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
