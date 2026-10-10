@@ -3,6 +3,7 @@ import { Event } from '../models/Event.js';
 import { generateTicketCode, generateQRPayload, generateQRCodeDataURL } from '../utils/ticketGenerator.js';
 import { sendTicketConfirmationEmail, sendEventReminderEmail } from '../utils/emailService.js';
 import { checkEventExpired } from '../utils/eventUtils.js';
+import { Certificate } from '../models/Certificate.js';
 import { createCertificateForRegistration } from './certificateController.js';
 
 export const registerForEvent = async (req, res) => {
@@ -355,10 +356,40 @@ export const getEventParticipants = async (req, res) => {
       );
     }
 
+    // Fetch event and certificates to attach credential info
+    const eventDoc = await Event.findById(eventId);
+    const certificates = await Certificate.find({ event: eventId });
+    const certMap = new Map();
+    certificates.forEach((c) => certMap.set(c.user.toString(), c));
+
+    const enrichedParticipants = await Promise.all(
+      participants.map(async (p) => {
+        const pObj = p.toObject ? p.toObject() : { ...p };
+        const userIdStr = (p.user?._id || p.user)?.toString();
+        let cert = certMap.get(userIdStr);
+
+        // Auto-generate certificate if checked in and not yet created
+        if (!cert && p.status === 'checked_in' && eventDoc) {
+          try {
+            cert = await createCertificateForRegistration(p, eventDoc);
+            if (cert) {
+              certMap.set(userIdStr, cert);
+            }
+          } catch (e) {
+            console.warn('Auto cert generation error in getParticipants:', e.message);
+          }
+        }
+
+        pObj.certificateId = cert?.certificateId || null;
+        pObj.verificationUrl = cert?.verificationUrl || null;
+        return pObj;
+      })
+    );
+
     return res.json({
       success: true,
-      count: participants.length,
-      participants,
+      count: enrichedParticipants.length,
+      participants: enrichedParticipants,
     });
   } catch (error) {
     console.error('getEventParticipants error:', error);

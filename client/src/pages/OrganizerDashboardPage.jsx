@@ -716,16 +716,30 @@ export const OrganizerDashboardPage = () => {
                             )}
                           </td>
                           <td className="py-3 px-4 text-right">
-                            <button
-                              onClick={() => handleToggleCheckIn(p._id || p.id)}
-                              className={`px-3 py-1 rounded-lg text-[11px] font-semibold transition-all ${
-                                isCheckedIn
-                                  ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/5'
-                                  : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
-                              }`}
-                            >
-                              {isCheckedIn ? 'Undo Check-in' : 'Mark Checked In'}
-                            </button>
+                            <div className="flex items-center justify-end gap-2">
+                              {p.certificateId && (
+                                <Link
+                                  to={`/verify/${p.certificateId}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex items-center gap-1 shadow-sm transition-all"
+                                  title="View Official Certificate of Participation"
+                                >
+                                  <Award className="w-3.5 h-3.5 text-amber-400" />
+                                  <span>View Cert</span>
+                                </Link>
+                              )}
+                              <button
+                                onClick={() => handleToggleCheckIn(p._id || p.id)}
+                                className={`px-3 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+                                  isCheckedIn
+                                    ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/5'
+                                    : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
+                                }`}
+                              >
+                                {isCheckedIn ? 'Undo Check-in' : 'Mark Checked In'}
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
