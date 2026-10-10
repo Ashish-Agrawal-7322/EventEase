@@ -171,6 +171,7 @@ export const MyTicketsPage = () => {
                 key={ticket.ticketCode}
                 ticket={ticket}
                 onOpenModal={(t) => setActiveModalTicket(t)}
+                onOpenVault={() => setShowVaultModal(true)}
               />
             ))}
           </div>

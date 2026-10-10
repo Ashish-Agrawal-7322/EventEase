@@ -3,6 +3,52 @@ import { Event } from '../models/Event.js';
 import { Registration } from '../models/Registration.js';
 import QRCode from 'qrcode';
 
+// Helper to generate a single certificate for a checked-in registration
+export const createCertificateForRegistration = async (registration, event) => {
+  try {
+    const userId = registration.user?._id || registration.user;
+    if (!userId || !event) return null;
+
+    const existing = await Certificate.findOne({ event: event._id, user: userId });
+    if (existing) {
+      return existing;
+    }
+
+    const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const certificateId = `MU-CERT-2026-${randomSuffix}-${Date.now().toString().slice(-4)}`;
+    const verificationUrl = `${process.env.APP_URL || 'http://localhost:5173'}/verify-certificate/${certificateId}`;
+
+    // Generate Data URL QR code
+    const qrCodeData = await QRCode.toDataURL(verificationUrl, {
+      errorCorrectionLevel: 'H',
+      margin: 1,
+      width: 200,
+      color: { dark: '#050914', light: '#ffffff' },
+    });
+
+    const cert = await Certificate.create({
+      certificateId,
+      event: event._id,
+      user: userId,
+      studentName: registration.studentName || registration.user?.name || 'Student Attendee',
+      studentRollNumber: registration.studentRollNumber || registration.user?.rollNumber || 'N/A',
+      studentDepartment: registration.studentDepartment || registration.user?.department || 'General',
+      eventTitle: event.title,
+      eventCategory: event.category || 'Collegiate Event',
+      eventDate: event.date || 'Official Campus Event',
+      venue: event.venue || 'Marwadi University Campus',
+      organizerName: event.organizerName || 'Campus Technical Council',
+      qrCodeData,
+      verificationUrl,
+    });
+
+    return cert;
+  } catch (error) {
+    console.error('createCertificateForRegistration error:', error);
+    return null;
+  }
+};
+
 export const issueCertificates = async (req, res) => {
   try {
     const { eventId } = req.params;
@@ -34,36 +80,11 @@ export const issueCertificates = async (req, res) => {
         continue;
       }
 
-      const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
-      const certificateId = `MU-CERT-2026-${randomSuffix}-${Date.now().toString().slice(-4)}`;
-      const verificationUrl = `${process.env.APP_URL || 'http://localhost:5173'}/verify-certificate/${certificateId}`;
-
-      // Generate Data URL QR code
-      const qrCodeData = await QRCode.toDataURL(verificationUrl, {
-        errorCorrectionLevel: 'H',
-        margin: 1,
-        width: 200,
-        color: { dark: '#050914', light: '#ffffff' },
-      });
-
-      const cert = await Certificate.create({
-        certificateId,
-        event: event._id,
-        user: reg.user._id,
-        studentName: reg.studentName || reg.user.name,
-        studentRollNumber: reg.studentRollNumber || reg.user.rollNumber || 'N/A',
-        studentDepartment: reg.studentDepartment || reg.user.department || 'General',
-        eventTitle: event.title,
-        eventCategory: event.category,
-        eventDate: event.date,
-        venue: event.venue,
-        organizerName: event.organizerName,
-        qrCodeData,
-        verificationUrl,
-      });
-
-      certificates.push(cert);
-      issuedCount++;
+      const cert = await createCertificateForRegistration(reg, event);
+      if (cert) {
+        certificates.push(cert);
+        issuedCount++;
+      }
     }
 
     return res.json({
@@ -81,7 +102,21 @@ export const issueCertificates = async (req, res) => {
 
 export const getMyCertificates = async (req, res) => {
   try {
-    const certs = await Certificate.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const userId = req.user._id;
+
+    // Auto-generate certificates for any checked-in registration of this user that doesn't have one yet
+    const checkedInRegs = await Registration.find({
+      user: userId,
+      status: 'checked_in',
+    }).populate('event');
+
+    for (const reg of checkedInRegs) {
+      if (reg.event) {
+        await createCertificateForRegistration(reg, reg.event);
+      }
+    }
+
+    const certs = await Certificate.find({ user: userId }).sort({ createdAt: -1 });
     return res.json({
       success: true,
       count: certs.length,

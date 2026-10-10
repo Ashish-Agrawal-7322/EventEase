@@ -3,6 +3,7 @@ import { Event } from '../models/Event.js';
 import { generateTicketCode, generateQRPayload, generateQRCodeDataURL } from '../utils/ticketGenerator.js';
 import { sendTicketConfirmationEmail, sendEventReminderEmail } from '../utils/emailService.js';
 import { checkEventExpired } from '../utils/eventUtils.js';
+import { createCertificateForRegistration } from './certificateController.js';
 
 export const registerForEvent = async (req, res) => {
   try {
@@ -252,12 +253,21 @@ export const checkInTicket = async (req, res) => {
       $inc: { checkedInCount: 1 },
     });
 
+    // Auto-generate Certificate of Participation upon gate check-in
+    let certificate = null;
+    try {
+      certificate = await createCertificateForRegistration(registration, event);
+    } catch (certErr) {
+      console.warn('Auto certificate generation warning:', certErr.message);
+    }
+
     const timeStr = checkInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     return res.status(200).json({
       success: true,
       status: 'success',
-      message: 'Check-in Successful! Welcome to the event.',
+      message: 'Check-in Successful! Certificate of Participation generated.',
+      certificateId: certificate?.certificateId || null,
       ticket: {
         ticketCode: registration.ticketCode,
         studentName: registration.studentName,
@@ -299,9 +309,21 @@ export const toggleManualCheckIn = async (req, res) => {
       $inc: { checkedInCount: wasCheckedIn ? -1 : 1 },
     });
 
+    // Auto-generate certificate if marked as checked in
+    if (newStatus === 'checked_in') {
+      try {
+        const eventDoc = await Event.findById(registration.event);
+        if (eventDoc) {
+          await createCertificateForRegistration(registration, eventDoc);
+        }
+      } catch (certErr) {
+        console.warn('Manual check-in certificate error:', certErr.message);
+      }
+    }
+
     return res.json({
       success: true,
-      message: wasCheckedIn ? 'Check-in reverted to registered' : 'Participant marked as checked-in',
+      message: wasCheckedIn ? 'Check-in reverted to registered' : 'Participant marked as checked-in & certificate generated',
       registration,
     });
   } catch (error) {

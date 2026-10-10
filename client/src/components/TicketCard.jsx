@@ -13,11 +13,12 @@ import {
   Download,
   ShieldCheck,
   User,
-  Hash
+  Hash,
+  Award
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export const TicketCard = ({ ticket, onOpenModal }) => {
+export const TicketCard = ({ ticket, onOpenModal, onOpenVault }) => {
   const [copied, setCopied] = useState(false);
   const event = ticket.event || {};
   const isCheckedIn = ticket.status === 'checked_in';
@@ -152,6 +153,15 @@ export const TicketCard = ({ ticket, onOpenModal }) => {
         </div>
 
         <div className="flex items-center gap-2">
+          {isCheckedIn && onOpenVault && (
+            <button
+              onClick={onOpenVault}
+              className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 text-amber-300 text-[11px] font-bold border border-amber-500/40 transition-all flex items-center gap-1 shadow-sm cursor-pointer"
+              title="View your verified Certificate of Participation"
+            >
+              <Award className="w-3 h-3 text-amber-400" /> Certificate
+            </button>
+          )}
           {onOpenModal && (
             <button
               onClick={() => onOpenModal(ticket)}
