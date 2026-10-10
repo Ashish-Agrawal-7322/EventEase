@@ -60,7 +60,7 @@ export const LoginPage = () => {
             <Zap className="w-6 h-6 text-cyan-400" />
           </div>
           <h2 className="text-2xl font-black text-white font-cyber tracking-tight">
-            SIGN IN TO EVENTEASE
+            SIGN IN TO EVENTSYNC
           </h2>
           <p className="text-xs text-slate-400">
             Access your encrypted college event credentials and entry passes.

@@ -18,7 +18,7 @@ export const seedDatabase = async () => {
 
     // 1. Create Core Platform Admin Account if empty
     await User.create({
-      name: 'Dr. Aris Thorne',
+      name: 'Dr. Rajesh Patel',
       email: 'admin@marwadiuniversity.ac.in',
       password: passwordHash,
       role: 'admin',

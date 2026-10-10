@@ -114,7 +114,7 @@ export function App() {
             <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                <span className="text-slate-400 font-cyber">EVENTEASE PROTOCOL v2.6</span>
+                <span className="text-slate-400 font-cyber">EVENTSYNC PROTOCOL v2.6</span>
                 <span>• Cryptographic Attendance & Gate Management</span>
               </div>
               <div>

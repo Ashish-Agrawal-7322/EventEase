@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
     const roleCredentials = {
       student: { email: 'alex.student@campus.edu', password: 'password123' },
       organizer: { email: 'sarah.organizer@campus.edu', password: 'password123' },
-      admin: { email: 'admin@campus.edu', password: 'password123' },
+      admin: { email: 'admin@marwadiuniversity.ac.in', password: 'password123' },
     };
 
     const creds = roleCredentials[targetRole];

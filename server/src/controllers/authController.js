@@ -599,10 +599,10 @@ export const getDemoAccounts = (req, res) => {
       {
         role: 'admin',
         label: 'Campus Admin',
-        name: 'Dr. Aris Thorne',
-        email: 'admin@campus.edu',
+        name: 'Dr. Rajesh Patel',
+        email: 'admin@marwadiuniversity.ac.in',
         password: 'password123',
-        desc: 'College-wide oversight, user roles, system metrics'
+        desc: 'Dean of Student Affairs • College-wide oversight, user roles, system metrics'
       }
     ]
   });

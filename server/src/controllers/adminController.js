@@ -6,8 +6,11 @@ export const getAdminStats = async (req, res) => {
   try {
     const realUserFilter = { email: { $not: /@campus\.edu$/i } };
     const totalUsers = await User.countDocuments(realUserFilter);
-    const studentsCount = await User.countDocuments({ ...realUserFilter, role: 'student' });
-    const organizersCount = await User.countDocuments({ ...realUserFilter, role: 'organizer' });
+    const pureStudentsCount = await User.countDocuments({ ...realUserFilter, role: 'student' });
+    const facultyCount = await User.countDocuments({ ...realUserFilter, isFaculty: true });
+    const studentOrganizersCount = await User.countDocuments({ ...realUserFilter, role: 'organizer', isFaculty: { $ne: true } });
+    const adminCount = await User.countDocuments({ ...realUserFilter, role: 'admin' });
+    const totalStudents = pureStudentsCount + studentOrganizersCount;
     const totalEvents = await Event.countDocuments();
     const totalRegistrations = await Registration.countDocuments();
     const totalCheckedIn = await Registration.countDocuments({ status: 'checked_in' });
@@ -35,8 +38,12 @@ export const getAdminStats = async (req, res) => {
       success: true,
       stats: {
         totalUsers,
-        studentsCount,
-        organizersCount,
+        studentsCount: totalStudents,
+        pureStudentsCount,
+        studentOrganizersCount,
+        organizersCount: studentOrganizersCount + facultyCount,
+        facultyCount,
+        adminCount,
         totalEvents,
         totalRegistrations,
         totalCheckedIn,

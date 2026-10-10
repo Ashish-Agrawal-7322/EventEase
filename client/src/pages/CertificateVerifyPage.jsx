@@ -43,7 +43,7 @@ export function CertificateVerifyPage() {
           className="inline-flex items-center gap-2 text-xs font-mono text-cyan-400 hover:text-cyan-300 transition-colors mb-6 group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          Back to EventEase Portal
+          Back to EventSync Portal
         </Link>
 
         {loading ? (
@@ -105,7 +105,7 @@ export function CertificateVerifyPage() {
                 <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-inner">
                   <Award className="w-8 h-8" />
                 </div>
-                <p className="text-xs font-mono uppercase tracking-[0.25em] text-cyan-400">Marwadi University • Campus EventEase</p>
+                <p className="text-xs font-mono uppercase tracking-[0.25em] text-cyan-400">Marwadi University • Campus EventSync</p>
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-white mt-1 tracking-tight font-cyber">
                   CERTIFICATE OF PARTICIPATION
                 </h1>

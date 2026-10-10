@@ -169,7 +169,7 @@ export const AdminDashboardPage = () => {
               <span className="text-xs text-slate-400 font-mono">Total Verified Users</span>
               <div className="text-3xl font-black text-white mt-1 font-mono">{stats.totalUsers}</div>
               <span className="text-[10px] text-cyan-400 font-mono mt-1 block">
-                {stats.studentsCount} Students • {stats.organizersCount} Organizers
+                {stats.studentsCount} Students • {stats.facultyCount || 1} Faculty • {stats.adminCount || 1} Admin
               </span>
             </div>
 

@@ -274,7 +274,7 @@ export const HomePage = () => {
                         <Zap className="w-4 h-4 text-cyan-400" />
                       </div>
                       <div>
-                        <span className="text-xs font-bold text-white tracking-wide block font-cyber">EVENTEASE PASS</span>
+                        <span className="text-xs font-bold text-white tracking-wide block font-cyber">EVENTSYNC PASS</span>
                         <span className="text-[9px] font-mono text-cyan-300">SECURE ADMISSION SYSTEM</span>
                       </div>
                     </div>
@@ -289,7 +289,7 @@ export const HomePage = () => {
                   <div className="my-5 flex flex-col items-center justify-center relative z-10">
                     <div className="relative p-3.5 rounded-2xl bg-white border-2 border-cyan-400 shadow-[0_0_30px_rgba(0,240,255,0.3)]">
                       <QRCodeSVG
-                        value="https://eventease.college/verify/EE-DEMO-PASS"
+                        value="https://eventsync.college/verify/ES-DEMO-PASS"
                         size={140}
                         level="H"
                         fgColor="#050914"
@@ -369,7 +369,7 @@ export const HomePage = () => {
             VERIFIED ENTRY PIPELINE
           </span>
           <h2 className="text-3xl sm:text-5xl font-black text-white font-cyber tracking-tight">
-            HOW EVENTEASE WORKS
+            HOW EVENTSYNC WORKS
           </h2>
           <p className="max-w-xl mx-auto text-xs sm:text-sm text-slate-400">
             From discovering a collegiate hackathon to laser check-in at the entrance gate in less than 200 milliseconds.
@@ -405,7 +405,7 @@ export const HomePage = () => {
             </div>
             <h3 className="text-lg font-bold text-white font-cyber">CRYPTOGRAPHIC MINTING</h3>
             <p className="text-xs text-slate-300 leading-relaxed">
-              EventEase generates a unique Holographic QR Ticket with your student roll ID, seat allocation, and an HMAC-SHA256 tamper-evident digital signature.
+              EventSync generates a unique Holographic QR Ticket with your student roll ID, seat allocation, and an HMAC-SHA256 tamper-evident digital signature.
             </p>
             <div className="pt-3 border-t border-white/5 flex items-center gap-2 text-[11px] text-purple-300 font-mono">
               <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
@@ -606,7 +606,7 @@ export const HomePage = () => {
               </div>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Standard event tickets are susceptible to screenshot sharing and tampering. EventEase encrypts the event ID, user ID, roll number, and secret hash into a compact scannable token that can only be validated against the official gate gateway.
+              Standard event tickets are susceptible to screenshot sharing and tampering. EventSync encrypts the event ID, user ID, roll number, and secret hash into a compact scannable token that can only be validated against the official gate gateway.
             </p>
           </div>
 
@@ -918,7 +918,7 @@ export const HomePage = () => {
             FREQUENTLY ASKED QUESTIONS
           </h2>
           <p className="text-xs sm:text-sm text-slate-400">
-            Everything you need to know about EventEase cryptographic attendance and gate scanning.
+            Everything you need to know about EventSync cryptographic attendance and gate scanning.
           </p>
         </div>
 
@@ -978,7 +978,7 @@ export const HomePage = () => {
           </h2>
 
           <p className="max-w-xl mx-auto text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Eliminate paper rosters, long entry lines, and unverified attendance. Join hundreds of students and college societies using EventEase.
+            Eliminate paper rosters, long entry lines, and unverified attendance. Join hundreds of students and college societies using EventSync.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">

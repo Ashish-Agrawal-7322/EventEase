@@ -46,7 +46,7 @@ export const Navbar = () => {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-cyan-400 via-teal-300 to-purple-400 bg-clip-text text-transparent font-cyber">
-                  EVENT<span className="text-white">EASE</span>
+                  EVENT<span className="text-white">SYNC</span>
                 </span>
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 font-mono font-medium">
                   v2.6
