@@ -65,3 +65,40 @@ export const ensureAdminUser = async () => {
     return null;
   }
 };
+
+export const purgeDummyData = async () => {
+  try {
+    // 1. Delete all dummy users (@campus.edu, Aris Thorne, Sarah Chen, Alex Rivera)
+    const delU = await User.deleteMany({
+      $or: [
+        { email: /@campus\.edu$/i },
+        { name: /Aris Thorne/i },
+        { name: /Sarah Chen/i },
+        { name: /Alex Rivera/i },
+      ]
+    });
+
+    // 2. Delete all dummy events (CyberSync Grand Hackathon 2026, or Sarah Chen)
+    const delE = await Event.deleteMany({
+      $or: [
+        { title: /CyberSync/i },
+        { organizerName: /Sarah Chen/i },
+        { organizerName: /Campus Technical Council/i },
+        { description: /flagship hackathon at Main Turing Arena/i },
+      ]
+    });
+
+    // 3. Delete any registrations by dummy users or for dummy events
+    const delR = await Registration.deleteMany({
+      $or: [
+        { studentEmail: /@campus\.edu$/i },
+        { studentName: /Alex Rivera/i },
+        { eventTitle: /CyberSync/i },
+      ]
+    });
+
+    console.log(`🧹 [Purge] Cleared ${delU.deletedCount || 0} dummy users, ${delE.deletedCount || 0} dummy events, ${delR.deletedCount || 0} dummy registrations.`);
+  } catch (err) {
+    console.error('[Purge] Error during purgeDummyData:', err.message);
+  }
+};

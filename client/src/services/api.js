@@ -192,6 +192,10 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify({ action, feedback }),
       }),
+    purgeDummyData: () =>
+      apiFetch('/admin/purge-dummy-data', {
+        method: 'POST',
+      }),
   },
 };
 

@@ -4,8 +4,8 @@
       "name": "Rahul Kumar",
       "email": "rahulkumar.128721@marwadiuniversity.ac.in",
       "password": "$2b$10$vfRg1vJYdrriz7AD.m0sueEHxYdGcHY8i5TtFpnzq/edaoZZjetB6",
-      "role": "student",
-      "organizerStatus": "none",
+      "role": "organizer",
+      "organizerStatus": "approved",
       "clubDetails": {},
       "isFaculty": false,
       "designation": "Assistant Professor",
@@ -19,12 +19,12 @@
       "_id": "75cbe3f86b2f0857",
       "id": "75cbe3f86b2f0857",
       "createdAt": "2026-10-10T04:04:36.169Z",
-      "updatedAt": "2026-10-10T04:04:36.170Z"
+      "updatedAt": "2026-10-10T04:47:55.320Z"
     },
     {
       "name": "Dr. Rajesh Patel",
       "email": "admin@marwadiuniversity.ac.in",
-      "password": "$2b$10$Pg/NA7OdVzzjqkW6l0dYeODspBkskjqDSnNZ5wykv52k4Dx7oA6Ym",
+      "password": "$2b$10$Dzyayl7AM6yCJuuCcvGF7uCaeC39Ovt7eCj.WI73DaPN2hryeUQBq",
       "role": "admin",
       "department": "Dean of Student Affairs",
       "organization": "Marwadi University Event & Academic Council",
@@ -33,7 +33,7 @@
       "_id": "a4c7ee34ab9a8a82",
       "id": "a4c7ee34ab9a8a82",
       "createdAt": "2026-10-10T04:22:20.139Z",
-      "updatedAt": "2026-10-10T04:22:20.140Z"
+      "updatedAt": "2026-10-10T05:22:29.176Z"
     }
   ],
   "events": [
@@ -50,12 +50,16 @@
       "capacity": 120,
       "registeredCount": 0,
       "checkedInCount": 0,
-      "organizer": "75cbe3f86b2f0857",
+      "organizer": {
+        "_id": "75cbe3f86b2f0857",
+        "name": "Rahul Kumar",
+        "email": "rahulkumar.128721@marwadiuniversity.ac.in"
+      },
       "organizerName": "Rahul Kumar (Campus Community)",
       "isFacultySponsored": false,
       "bannerImage": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&auto=format&fit=crop&q=80",
       "status": "upcoming",
-      "approvalStatus": "pending",
+      "approvalStatus": "approved",
       "submittedByRole": "student",
       "tags": [
         "Marwadi University",
@@ -66,9 +70,51 @@
       "_id": "204c8e9aaa33cd18",
       "id": "204c8e9aaa33cd18",
       "createdAt": "2026-10-10T04:06:37.012Z",
-      "updatedAt": "2026-10-10T04:06:37.012Z"
+      "updatedAt": "2026-10-10T04:47:55.315Z",
+      "adminFeedback": "Approved by Campus Administration"
+    },
+    {
+      "title": "A tech fest specifically for second year student of MU 2026",
+      "tagline": "Intensive hands-on collegiate tech fest designed for modern engineers and innovators.",
+      "description": "### 🚀 Event Overview\nWelcome to **A tech fest specifically for second year student of MU 2026**, a flagship collegiate experience organized for Marwadi University students. Whether you are building from scratch or refining your skills, this session is engineered to provide practical mastery, peer collaboration, and verified credentials.\n\n### ⏱️ Detailed Event Agenda\n- **10:00 AM - 10:30 AM**: Gate Check-in & Holographic QR Pass Verification at Entry Gate\n- **10:30 AM - 11:15 AM**: Keynote Briefing & Industry Mentor Orientation\n- **11:15 AM - 01:00 PM**: Hands-on Sprint & Collaborative Prototyping Phase 1\n- **01:00 PM - 02:00 PM**: Networking Lunch & Campus Chapter Meetup\n- **02:00 PM - 03:30 PM**: Deep Dive Lab & Live Coding / Demonstration\n- **03:30 PM - 04:00 PM**: Showcase, Faculty Review & Digital Certificate Awarding\n\n### 🎒 Prerequisites & Equipment\n- Personal laptop with charger and Wi-Fi enabled\n- Basic familiarity with collegiate course topics\n- Official Marwadi University student ID pass\n\n### 🏆 Participant Benefits\n- Cryptographic Digital Certificate of Participation (verifiable via QR code)\n- Mentorship from club leads and faculty advisors\n- Activity / Accreditation credit points for your academic profile",
+      "category": "Tech Fest",
+      "venue": "semainar hall",
+      "date": "2026-10-24",
+      "startTime": "10:00 AM",
+      "endTime": "04:00 PM",
+      "registrationDeadline": "2026-10-15",
+      "capacity": 150,
+      "registeredCount": 0,
+      "checkedInCount": 0,
+      "organizer": "75cbe3f86b2f0857",
+      "organizerName": "Rahul Kumar (Campus Community)",
+      "isFacultySponsored": false,
+      "bannerImage": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&auto=format&fit=crop&q=80",
+      "status": "upcoming",
+      "approvalStatus": "approved",
+      "submittedByRole": "organizer",
+      "tags": [
+        "Marwadi University",
+        "Tech Fest",
+        "Innovation",
+        "Hands-On"
+      ],
+      "_id": "2894ac35260c6fb2",
+      "id": "2894ac35260c6fb2",
+      "createdAt": "2026-10-10T04:50:00.112Z",
+      "updatedAt": "2026-10-10T04:50:00.112Z"
     }
   ],
   "registrations": [],
-  "otps": []
+  "otps": [
+    {
+      "email": "ashish.agrawal124537@marwadiuniversity.ac.in",
+      "otp": "358219",
+      "type": "registration",
+      "_id": "8df9edc58123728b",
+      "id": "8df9edc58123728b",
+      "createdAt": "2026-10-10T04:56:28.954Z",
+      "updatedAt": "2026-10-10T04:56:28.954Z"
+    }
+  ]
 }

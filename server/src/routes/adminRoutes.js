@@ -7,6 +7,7 @@ import {
   reviewOrganizerRequest,
   getPendingEvents,
   reviewEvent,
+  purgeDummyDataEndpoint,
 } from '../controllers/adminController.js';
 import { protect, authorize } from '../middleware/auth.js';
 
@@ -22,5 +23,6 @@ router.get('/organizer-requests', getOrganizerRequests);
 router.put('/organizer-requests/:userId/review', reviewOrganizerRequest);
 router.get('/pending-events', getPendingEvents);
 router.put('/pending-events/:eventId/review', reviewEvent);
+router.post('/purge-dummy-data', purgeDummyDataEndpoint);
 
 export default router;

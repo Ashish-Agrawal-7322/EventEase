@@ -115,6 +115,17 @@ export const AdminDashboardPage = () => {
     }
   };
 
+  const handlePurgeDummyData = async () => {
+    if (!window.confirm('Are you sure you want to completely purge all legacy dummy events, sample tickets, and demo users from the database? Real campus records will be preserved.')) return;
+    try {
+      const res = await api.admin.purgeDummyData();
+      alert(res.message || 'Dummy data successfully purged!');
+      loadAdminData();
+    } catch (err) {
+      alert(err.message || 'Error purging dummy data');
+    }
+  };
+
   const filteredUsers = users.filter((u) => {
     if (!userSearch.trim()) return true;
     const q = userSearch.toLowerCase();
@@ -153,13 +164,22 @@ export const AdminDashboardPage = () => {
             </p>
           </div>
 
-          <button
-            onClick={loadAdminData}
-            className="p-2.5 rounded-xl bg-slate-900 border border-white/10 text-slate-300 hover:text-white"
-            title="Refresh All"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={handlePurgeDummyData}
+              className="px-3 py-2 rounded-xl bg-red-950/60 border border-red-500/40 text-red-300 hover:text-white hover:bg-red-900/60 transition-all text-xs font-mono flex items-center gap-1.5 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
+              title="Purge legacy dummy data"
+            >
+              <span>🧹 Purge Dummy Data</span>
+            </button>
+            <button
+              onClick={loadAdminData}
+              className="p-2.5 rounded-xl bg-slate-900 border border-white/10 text-slate-300 hover:text-white"
+              title="Refresh All"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Global Metric Cards */}

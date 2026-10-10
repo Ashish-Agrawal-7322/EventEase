@@ -11,12 +11,16 @@ export const getAdminStats = async (req, res) => {
     const studentOrganizersCount = await User.countDocuments({ ...realUserFilter, role: 'organizer', isFaculty: { $ne: true } });
     const adminCount = await User.countDocuments({ ...realUserFilter, role: 'admin' });
     const totalStudents = pureStudentsCount + studentOrganizersCount;
-    const totalEvents = await Event.countDocuments();
-    const totalRegistrations = await Registration.countDocuments();
-    const totalCheckedIn = await Registration.countDocuments({ status: 'checked_in' });
+    const realEventFilter = {
+      title: { $not: /cybersync/i },
+      organizerName: { $not: /sarah chen/i },
+    };
+    const totalEvents = await Event.countDocuments(realEventFilter);
+    const totalRegistrations = await Registration.countDocuments({ studentEmail: { $not: /@campus\.edu$/i } });
+    const totalCheckedIn = await Registration.countDocuments({ status: 'checked_in', studentEmail: { $not: /@campus\.edu$/i } });
 
     // Events by category
-    const allEvents = await Event.find({});
+    const allEvents = await Event.find(realEventFilter);
     const categoryMap = {};
     allEvents.forEach(e => {
       categoryMap[e.category] = (categoryMap[e.category] || 0) + 1;
@@ -330,6 +334,20 @@ export const reviewEvent = async (req, res) => {
   } catch (error) {
     console.error('reviewEvent error:', error);
     return res.status(500).json({ success: false, message: 'Error reviewing event' });
+  }
+};
+
+export const purgeDummyDataEndpoint = async (req, res) => {
+  try {
+    const { purgeDummyData } = await import('../seeds/seedData.js');
+    await purgeDummyData();
+    return res.json({
+      success: true,
+      message: 'All dummy events, demo accounts, and sample registrations have been completely purged!',
+    });
+  } catch (error) {
+    console.error('purgeDummyDataEndpoint error:', error);
+    return res.status(500).json({ success: false, message: error.message || 'Error purging dummy data' });
   }
 };
 

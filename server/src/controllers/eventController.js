@@ -26,6 +26,16 @@ export const getEvents = async (req, res) => {
 
     let events = await Event.find(filter).sort({ createdAt: -1 });
 
+    // Exclude dummy test/sample events (show ONLY real student & faculty events)
+    events = events.filter(e => {
+      const title = (e.title || '').toLowerCase();
+      const org = (e.organizerName || '').toLowerCase();
+      if (title.includes('cybersync') || org.includes('sarah chen') || org.includes('campus technical council')) {
+        return false;
+      }
+      return true;
+    });
+
     if (search && search.trim() !== '') {
       const q = search.toLowerCase().trim();
       events = events.filter(e => 
