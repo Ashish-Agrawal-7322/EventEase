@@ -95,6 +95,7 @@ export function App() {
 
               {/* Public Verifiable Digital Certificate */}
               <Route path="/verify-certificate/:certificateId" element={<CertificateVerifyPage />} />
+              <Route path="/verify/:certificateId" element={<CertificateVerifyPage />} />
 
               {/* Authentication */}
               <Route path="/login" element={<LoginPage />} />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Award, ShieldCheck, X, ExternalLink, Printer, Calendar, MapPin, Building, Sparkles } from 'lucide-react';
+import { Award, ShieldCheck, X, ExternalLink, Printer, Calendar, MapPin, Building, Sparkles, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 
@@ -31,6 +31,18 @@ export function CertificateVaultModal({ isOpen, onClose }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAddToLinkedIn = (cert) => {
+    if (!cert) return;
+    const issueDate = new Date(cert.issuedAt || cert.createdAt || Date.now());
+    const publicUrl = `${window.location.origin}/verify/${cert.certificateId}`;
+    const linkedInUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent(
+      cert.eventTitle + ' (Certificate of Participation)'
+    )}&organizationName=${encodeURIComponent('Marwadi University')}&issueYear=${issueDate.getFullYear()}&issueMonth=${
+      issueDate.getMonth() + 1
+    }&certUrl=${encodeURIComponent(publicUrl)}&certId=${encodeURIComponent(cert.certificateId)}`;
+    window.open(linkedInUrl, '_blank');
   };
 
   if (!isOpen) return null;
@@ -119,13 +131,21 @@ export function CertificateVaultModal({ isOpen, onClose }) {
               {/* Right Certificate Full Preview */}
               {selectedCert && (
                 <div className="lg:col-span-2 space-y-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-xs font-mono text-emerald-400 flex items-center gap-1.5">
                       <ShieldCheck className="w-4 h-4" /> VERIFIED ON MARWADI UNIVERSITY REGISTRY
                     </span>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() => handleAddToLinkedIn(selectedCert)}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#0077b5] hover:bg-[#006097] text-white text-xs font-mono font-bold transition-all shadow-sm"
+                        title="Add credential to LinkedIn Profile"
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                        <span>Add to LinkedIn</span>
+                      </button>
                       <Link
-                        to={`/verify-certificate/${selectedCert.certificateId}`}
+                        to={`/verify/${selectedCert.certificateId}`}
                         target="_blank"
                         className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-xs font-mono border border-cyan-500/40"
                       >
@@ -179,6 +199,7 @@ export function CertificateVaultModal({ isOpen, onClose }) {
                       <div>
                         <p className="text-[9px] font-mono text-slate-500 uppercase">Registry Token</p>
                         <p className="text-xs font-mono font-bold text-cyan-400">{selectedCert.certificateId}</p>
+                        <p className="text-[9px] text-amber-400 font-mono mt-0.5">Signed by Dr. Rajesh Patel (Dean)</p>
                       </div>
 
                       {selectedCert.qrCodeData && (
